@@ -2,17 +2,11 @@
 import sqlite3
 import logging
 import threading
-import os # <-- NEW
-import psycopg2 # <-- NEW
+import os
+import psycopg2
 from typing import Optional, Any, List, Dict
-from urllib.parse import urlparse # <-- NEW
+from urllib.parse import urlparse
 
-# --- NEW: Cloud Database Logic ---
-# Render (and other hosts) provides the DB connection string in an env variable
-DATABASE_URL = os.environ.get('DATABASE_URL')
-IS_PRODUCTION = DATABASE_URL is not None
-
-# Fallback to local file if not in production
 DB_NAME = "local_farm_data.db"
 
 db_local = threading.local()
@@ -87,7 +81,6 @@ class DBConnector:
             cursor = conn.cursor()
             
             if IS_PRODUCTION:
-                # PostgreSQL uses %s placeholders
                 query = query.replace("?", "%s")
 
             cursor.execute(query, params)
@@ -96,7 +89,7 @@ class DBConnector:
             return True
         except Exception as e:
             logging.error(f"Error executing commit: {e}")
-            conn.rollback() # Rollback on failure
+            conn.rollback()
             return False
 
     @staticmethod

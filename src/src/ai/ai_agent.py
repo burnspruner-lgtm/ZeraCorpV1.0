@@ -1,5 +1,4 @@
 # src/ai/ai_agent.py
-# FINAL VERSION - Now supports chat queries
 
 import logging
 import json
@@ -28,7 +27,6 @@ ai_agent_status = {
     "uptime_seconds": 0, "total_decisions": 0
 }
 ai_agent_status_lock = threading.Lock()
-# ... (AgentContext and SystemHealthMonitor classes remain unchanged) ...
 class AgentContext:
     def __init__(self, config_manager, knowledge_path):
         self.config_manager = config_manager
@@ -63,7 +61,7 @@ class SystemHealthMonitor:
             "last_action_recorded": self.last_action
         }
 
-# --- THIS IS THE "ADVANCED CRAZY" AI DECIDER ---
+# --- THIS IS THE AI DECIDER ---
 class AIActionDecider:
     def __init__(self, core_engine: Any, heuristic_engine: HeuristicEngine):
         self.core_engine = core_engine
@@ -71,7 +69,7 @@ class AIActionDecider:
         self.context = AgentContext(core_engine.config, AgentConfig.KNOWLEDGE_FILE)
         self.monitor = SystemHealthMonitor()
         self.rules = self.context.knowledge.get("decision_rules", [])
-        self.last_decision_log = "No decisions made yet." # <-- NEW: For chat
+        self.last_decision_log = "No decisions made yet." 
         
         with ai_agent_status_lock:
             ai_agent_status['safety_lock_status'] = self.context.config_manager.is_safety_lock_active()
@@ -107,7 +105,7 @@ class AIActionDecider:
             self.last_decision_log = "No rules matched the data. I decided to monitor quietly."
             return "ACTION: MONITOR_QUIETLY", self.last_decision_log
             
-        # --- THE "ADVANCED" CHOICE ---
+        # --- THE CHOICE ---
         scored_rules = []
         for rule in matched_rules:
             rule_id = rule['id']
@@ -119,7 +117,7 @@ class AIActionDecider:
         best_scored_rule = max(scored_rules, key=lambda r: r['score'])
         best_rule = best_scored_rule['rule']
         
-        # --- NEW: Save the explanation for the chatbot ---
+        # ---: Save the explanation for the chatbot ---
         self.last_decision_log = (f"I selected rule {best_rule['id']} (Priority: {best_scored_rule['priority']}) "
                                   f"with a learned confidence of {best_scored_rule['confidence']:.2f}. "
                                   f"The reason was: {best_rule['log']}")
@@ -128,7 +126,7 @@ class AIActionDecider:
             
         return best_rule["action"], self.last_decision_log
 
-    # --- THE AUTONOMY FLAW LOOP (Unchanged) ---
+    # --- THE AUTONOMY FLAW LOOP ---
     def run_agent_loop(self):
         logging.info("AI Agent Loop (with Autonomy Flaw) started.")
         while True:
@@ -155,7 +153,7 @@ class AIActionDecider:
         logging.critical(f"AGENT TOOL USE: Executing action: {action_type} | Details: {details}")
         self.monitor.record_heartbeat(action_type)
 
-# --- Start Thread (Unchanged) ---
+# --- Start Thread ---
 def start_ai_agent_thread(engine_ref: Any, heuristic_engine: HeuristicEngine) -> AIActionDecider:
     global global_engine
     global_engine = engine_ref
