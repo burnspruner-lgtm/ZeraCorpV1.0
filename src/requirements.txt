@@ -1,6 +1,5 @@
 # requirements.txt
 
-pip install pip
 flask
 psutil
 Werkzeug
@@ -11,3 +10,4 @@ flask-cors
 requests
 pandas
 scikit-learn
+pip install pip-25.3
