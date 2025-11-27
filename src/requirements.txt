@@ -10,4 +10,3 @@ flask-cors
 requests
 pandas
 scikit-learn
-pip install pip-25.3
