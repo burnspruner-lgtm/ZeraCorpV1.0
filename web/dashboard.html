@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agriadvisor (V-MAX)</title>
+    <title>🛜Zera🌐Corp</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -31,12 +31,12 @@
 
     <div id="auth-page" class="auth-container absolute z-50 w-screen h-screen">
         <div class="auth-card">
-            <h1 class="text-3xl font-bold text-center mb-2">🌾 Agriadvisor</h1>
-            <p class="text-gray-600 text-center mb-6">V-MAX Secure System</p>
+            <h1 class="text-3xl font-bold text-center mb-2">🌾 Wecome to Zera Coorperation Limited⚛️</h1>
+            <p class="text-gray-600 text-center mb-6">Provide your credentials to access the system.⏬</p>
             
             <div class="flex border-b mb-6">
-                <button id="tab-login" class="auth-tab active">Login</button>
-                <button id="tab-register" class="auth-tab">Register</button>
+                <button id="tab-login" class="auth-tab active">☑️Login</button>
+                <button id="tab-register" class="auth-tab">®️Register</button>
             </div>
             
             <div id="login-form-container">
@@ -52,7 +52,7 @@
                 <form id="register-form">
                     <input id="register-username" type="text" placeholder="Username" class="w-full p-3 border rounded mb-4" required>
                     <input id="register-password" type="password" placeholder="Password" class="w-full p-3 border rounded mb-4" required>
-                    <p class="text-sm text-gray-500 mb-4">All new accounts are registered as a standard 'User'. An admin can promote your account.</p>
+                    <p class="text-sm text-gray-500 mb-4">If u don't have an account u will have to register here.<br>Alternatively, u can use the Registration tab.</p>
                     <button type="submit" class="w-full bg-gray-700 text-white p-3 rounded font-semibold hover:bg-gray-600">Register</button>
                     <div id="register-message" class="mt-4 text-center"></div>
                 </form>
@@ -62,22 +62,22 @@
 
     <div id="app-shell" class="flex h-screen w-screen hidden">
         <nav class="w-64 bg-gray-800 text-white flex-shrink-0 p-4 flex flex-col">
-            <h1 class="text-2xl font-bold mb-6">Agriadvisor</h1>
+            <h1 class="text-2xl font-bold mb-6">ZeraCorp</h1>
             <div id="sidebar-nav" class="space-y-2 flex-grow"></div>
             <div class="border-t border-gray-700 pt-4">
                 <div id="user-profile" class="text-gray-400">
                     <p class="font-semibold" id="user-name">Not Logged In</p>
                     <p class="text-sm" id="user-role">No Role</p>
                 </div>
-                <button id="logout-button" class="w-full text-left nav-link mt-2"><i class="fa-solid fa-sign-out-alt"></i>Logout</button>
+                <button id="logout-button" class="w-full text-left nav-link mt-2"><i class="fa-solid fa-sign-out-alt"></i>🔚Logout</button>
             </div>
         </nav>
         <main class="flex-1 flex flex-col h-screen">
             <header class="bg-white border-b border-gray-200 p-3 flex justify-end items-center space-x-6">
-                <div><span class="stat-title">Heartbeat:</span> <span id="heartbeat" class="stat-value text-xs text-red-600 ml-2">OFFLINE</span></div>
+                <div><span class="stat-title">Heartbeat:</span> <span id="heartbeat" class="stat-value text-xs text-red-600 ml-2">ONLINE</span></div>
                 <div data-role="developer" data-role-admin><span class="stat-title">Safety Lock:</span> <span id="safety-lock-status" class="stat-value text-xs text-gray-500 ml-2">N/A</span></div>
                 <button id="btn-trigger-ai" data-role="admin" data-role-user class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
-                    <i class="fa-solid fa-play mr-2"></i>Run Global AI Decision
+                    <i class="fa-solid fa-play mr-2"></i>AI Decision
                 </button>
             </header>
             <div class="flex-1 p-6 overflow-y-auto">
@@ -94,7 +94,7 @@
                             <form id="data-form" class="grid grid-cols-2 md:grid-cols-4 gap-6 p-4">
                                 <div><label class="font-semibold">Field ID</label><input type="text" id="field-id" value="Maize-Field-01" class="w-full p-2 border rounded" required></div>
                                 <div><label class="font-semibold">Nutrient Level</label><select name="nutrient_level" class="w-full p-2 border rounded"><option>OPTIMAL</option><option>LOW</option><option>HIGH</option><option>N/A</option></select></div>
-                                <div><label class="font-semibold">Historical Trend</label><select name="historical_trend" class="w-full p-2 border rounded"><option>NORMAL</option><option>HIGH_INTERVENTION</option></select></div>
+                                <div><label class="font-semibold">Historical Trend</label><select name="historical_trend" class="w-full p-2 border rounded"><option>NORMAL</option><option>HIGH_INTERVENTION</option><option>I DON'T KNOW</option></select></div>
                                 <div><label class="font-semibold">Cost (KES)</label><input type="number" name="cost_kes" value="1000" class="w-full p-2 border rounded"></div>
                                 <div><label class="font-semibold">Moisture (<span id="val-moisture">65</span>%)</label><input type="range" name="moisture" min="0" max="100" value="65" class="w-full slider" oninput="this.previousElementSibling.textContent = this.value"></div>
                                 <div><label class="font-semibold">Temp (<span id="val-temp">25</span>°C)</label><input type="range" name="temp" min="0" max="50" value="25" class="w-full slider" oninput="this.previousElementSibling.textContent = this.value"></div>
@@ -107,7 +107,7 @@
                 </div>
                 <div id="page-ai_chat" class="page" data-role="user" data-role-admin>
                     <div class="card p-4">
-                        <h3 class="text-lg font-semibold mb-4">Interact with Agriadvisor AI</h3>
+                        <h3 class="text-lg font-semibold mb-4">Interact with GURU</h3>
                         <div id="chat-window" class="h-96 border rounded-lg p-4 overflow-y-auto bg-gray-50 mb-4">
                             <div class="text-gray-700 mb-2 p-3 rounded-lg bg-gray-200 w-3/4">Hello! Ask me a question, like "Explain rule R001" or "What is your confidence in the irrigation pump?"</div>
                         </div>

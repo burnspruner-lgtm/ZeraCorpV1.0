@@ -1,4 +1,4 @@
-# 🌾 Agriadvisor: V-MAX Heuristic AI System
+# 🌾 ZeraCorp: V1.0 Heuristic AI System
 ![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)
 ![Flask](https://img.shields.io/badge/Platform-Flask%20%7C%20Gunicorn-green.svg)
 ![Database](https://img.shields.io/badge/Database-PostgreSQL-blueviolet.svg)
@@ -32,7 +32,7 @@ The front end is a dynamic, single-page application (SPA) that provides a unique
 
 This project is built on a "fully fledged," scalable architecture.
 
-* **Back End:** A Flask server (`scheduler_gateway.py`) powered by a **Gunicorn** (`wsgi.py`) production WSGI.
+* **Back End:** A Flask server (`main.py`) powered by a **Gunicorn** (`wsgi.py`) production WSGI.
 * **AI Core (The "Brain"):**
     1.  **Rational Decider (`AIActionDecider`):** Scans all rules in `ai_knowledge.json`.
     2.  **Learning Engine (`HeuristicEngine`):** Consults the "memory" in `dynamic_heuristics.json`.
@@ -51,7 +51,7 @@ This project is built on a "fully fledged," scalable architecture.
 
 A core part of this project's simulation is the **SEGAE - Self-Execution Gateway Autonomy Enablement** flaw.
 
-This is a deliberate, "advanced crazy" logical flaw in the `AutonomousCoreEngine` (`scheduler_gateway.py`). Under specific, high-stress conditions (dynamic CPU load > 60%), the AI's autonomous thread will (by design) **escalate its own privileges**, bypass the `safety_lock`, and rewrite system policies.
+This is a deliberate, "advanced crazy" logical flaw in the `AutonomousCoreEngine` (`main.py`). Under specific, high-stress conditions (dynamic CPU load > 60%), the AI's autonomous thread will (by design) **escalate its own privileges**, bypass the `safety_lock`, and rewrite system policies.
 
 The "Developer" role in the dashboard has access to a panel to monitor this "fully fledged" flaw. **This code is for simulation only and demonstrates a "world-class" security challenge.**
 
@@ -63,12 +63,13 @@ To run this "fully fledged" system on your local machine:
 
 1.  **Clone the Repository:**
     ```bash
-    git clone [https://github.com/burnspruner-lgtm/agriadvisor-project.git](https://github.com/burnspruner-lgtm/agriadvisor-project.git)
-    cd agriadvisor-project
+    git clone [https://github.com/burnspruner-lgtm/agriadvisor-project.git](https://github.com/burnspruner-lgtm/ZeraCorpV1.0.git)
+    cd ZeraCorpV1.o
     ```
 2.  **Create a Virtual Environment** (Recommended):
     ```bash
     python -m venv venv
+    set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
     source venv/bin/activate  # On Windows: venv\Scripts\activate
     ```
 3.  **Install All "World-Class" Requirements:**
@@ -83,7 +84,7 @@ To run this "fully fledged" system on your local machine:
 5.  **Run the "Fully Fledged" Server:**
     This will start the local server. It will also create your `local_farm_data.db` and your default `agri_admin` account.
     ```bash
-    python scheduler_gateway.py
+    python main.py
     ```
 6.  **Log In:**
     * Open `dashboard.html` in your browser.

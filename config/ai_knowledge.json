@@ -1,12 +1,12 @@
 {
-    "model_version": "FarmTech-Agent-V6.0-Enterprise-Security-Edition",
+    "model_version": "FarmTech-Agent-V1.0-Enterprise-Security-Edition",
     "training_date": "2025-11-15",
     "developer_context": "DeKUT Mechanical Engineering Project",
     
     "system_metadata": {
         "status": "Production-Ready-Simulation",
         "last_audit": "2025-11-15",
-        "compliance_standard": "ISO 27001-Simulated-V6.0",
+        "compliance_standard": "ISO 27001-Simulated-V1.0",
         "documentation_link": "https://dekut-farmtech.io/docs/v6"
     },
     

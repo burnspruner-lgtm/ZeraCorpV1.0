@@ -1,4 +1,4 @@
-# FarmTech Analytics API Documentation (V6.0)
+# FarmTech Analytics API Documentation (V1.0)
 
 Base URL: `http://127.0.0.1:5000`
 
