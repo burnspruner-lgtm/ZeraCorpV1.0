@@ -1,30 +1,36 @@
 import sys
 import os
-import logging
+import subprocess
 
-# 1. Add the current directory to Python's path so 'src' is recognized as a package
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# 1. Ensure 'src' is in the Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
 
-# 2. Configure Logging
-logging.basicConfig(level=logging.INFO, format='[BOOTSTRAP] %(message)s')
+# 2. Check for Flask manually to give a better error
+try:
+    import flask
+    print(f"✅ Flask found: {flask.__version__}")
+except ImportError:
+    print("❌ CRITICAL: Flask not found.")
+    print("   Attempting to install requirements automatically...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+    print("✅ Installation complete. Restarting...")
+    # Restart the script
+    os.execv(sys.executable, ['python'] + sys.argv)
 
-logging.info("--- ZeraCorp V1.0 System Bootstrapper ---")
-logging.info(f"Root Directory: {os.getcwd()}")
-
-# 3. Import and Run the Main Application
+# 3. Import and Run the App
 try:
     from src.main import app, init_system, start_threads
     
-    # Initialize the "Fully Fledged" components
+    print("🚀 Booting ZeraCorp V1.0...")
     init_system()
     start_threads()
     
-    # Launch the Server
-    logging.info("Server starting on http://127.0.0.1:5000")
+    # Disable reloader to prevent double-initialization of threads
     app.run(host="127.0.0.1", port=5000, debug=True, use_reloader=False)
     
 except ImportError as e:
-    logging.critical(f"Import Error: {e}")
-    logging.critical("Ensure you are running this script from the project root directory.")
-except Exception as e:
-    logging.critical(f"System Crash: {e}")
+    print(f"\n❌ IMPORT ERROR: {e}")
+    print("   Tip: Make sure you are running 'python run_system.py' from the root folder.")
+    print(f"   Current Directory: {os.getcwd()}\n")
+    input("Press Enter to exit...")
