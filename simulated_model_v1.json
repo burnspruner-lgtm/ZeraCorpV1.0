@@ -4,8 +4,8 @@
     "training_time_sec": 0.017482995986938477,
     "records_trained": 1600,
     "performance_metrics": {
-        "mae": 3.941375631579657,
-        "r_squared": 0.6850819726337122
+        "mae": 3.9838469730320525,
+        "r_squared": 0.7048611037624714
     },
     "features_used": [
         "moisture",
