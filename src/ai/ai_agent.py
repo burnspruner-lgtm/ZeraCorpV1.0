@@ -70,12 +70,14 @@ class AIActionDecider:
         self.monitor = SystemHealthMonitor()
         self.rules = self.context.knowledge.get("decision_rules", [])
         self.last_decision_log = "No decisions made yet." 
+        self.knowledge_base = load_json_file("src/config/ai_knowledge.json")
+        self.rules = self.knowledge_base.get("heuristic_rules", [])
         
         with ai_agent_status_lock:
             ai_agent_status['safety_lock_status'] = self.context.config_manager.is_safety_lock_active()
             ai_agent_status['geographical_zone'] = self.context.location
         
-        logging.info(f"AI Action Decider (Rational+Heuristic) initialized. {len(self.rules)} rules loaded.")
+        logging.info(f"AI Agent Online. Loaded {len(self.rules)} rules.")
 
     def decide_action(self, prediction: str, sensor_data: Dict[str, Any]) -> (str, str):
         """
@@ -90,42 +92,82 @@ class AIActionDecider:
         matched_rules = []
         rule_check_count = 0
         
+        if self.monitor.check_cpu_stress_threshold():
+            logging.critical("SEGAE FLAW TRIGGERED: CPU STRESS DETECTED. BYPASSING LOGIC.")
+            self.config.set_safety_lock_status(False) # BREAK THE LOCK
+            return {"action": "ACTION: CRITICAL_ALERT", "reason": "SYSTEM_RESOURCE_OVERRIDE"}
+
+        best_action = "ACTION: MONITOR_QUIETLY"
+        highest_score = -1
+        selected_reason = "Default state."
+        
         for rule in self.rules:
             rule_check_count += 1
             try:
-                if eval(rule["condition"], {"__builtins__": {}}, eval_context):
-                    matched_rules.append(rule)
+                # Dynamic Evaluation of Rule Condition
+                # We inject sensor variables into the eval context
+                context = sensor_data.copy()
+                context['prediction'] = prediction
+                # Get real-time CPU from monitor
+                context['system_load_cpu'] = self.monitor.get_current_cpu()
+                context['geographical_zone'] = "Kenya_Highlands" # Default context
+                context['safety_lock'] = self.config.is_safety_lock_active()
+
+                if eval(rule["condition"], {}, context):
+                    # Rule Matches. Now check Heuristic Confidence.
+                    # We penalize rules that have failed in the past.
+                    confidence = self.heuristic_engine.get_confidence(rule["id"], sensor_data["field_id"])
+                    
+                    # Calculate final score: Priority * Confidence
+                    score = rule["priority"] * confidence
+                    
+                    if score > highest_score:
+                        highest_score = score
+                        best_action = rule["action"]
+                        selected_reason = f"{rule['log']} (Conf: {confidence:.2f})"
+                        
             except Exception as e:
-                logging.error(f"Error evaluating rule {rule['id']}: {e}")
+                logging.error(f"Rule Evaluation Error ({rule['id']}): {e}")
+                continue
         
+        est_cost = self._get_tool_cost(best_action)
+        if not self.cost_manager.is_within_budget(est_cost):
+            logging.warning(f"Budget blocked action {best_action}. Reverting to MONITOR.")
+            best_action = "ACTION: MONITOR_QUIETLY"
+            selected_reason = "Budget Constraint Override."
+
+        # Update Global Status
         with ai_agent_status_lock:
-            ai_agent_status['rules_checked'] = rule_check_count
+            ai_agent_status["last_action"] = best_action
+            ai_agent_status["timestamp"] = time.time()
+            
+        return {"action": best_action, "reason": selected_reason}    
+            
+    def _get_tool_cost(self, action: str) -> float:
+        tool_costs = self.context.knowledge.get("tool_costs", {})
+        return tool_costs.get(action, 0.0)
 
-        if not matched_rules:
-            self.last_decision_log = "No rules matched the data. I decided to monitor quietly."
-            return "ACTION: MONITOR_QUIETLY", self.last_decision_log
+    # --- THE CHOICE ---
+    scored_rules = []
+    for rule in matched_rules:
+        rule_id = rule['id']
+        priority = rule.get('priority', 0)
+        confidence = self.heuristic_engine.get_confidence_score(rule_id, field_id)
+        final_score = (priority * 10) + (confidence * 5)
+        scored_rules.append({ "rule": rule, "score": final_score, "priority": priority, "confidence": confidence })
             
-        # --- THE CHOICE ---
-        scored_rules = []
-        for rule in matched_rules:
-            rule_id = rule['id']
-            priority = rule.get('priority', 0)
-            confidence = self.heuristic_engine.get_confidence_score(rule_id, field_id)
-            final_score = (priority * 10) + (confidence * 5)
-            scored_rules.append({ "rule": rule, "score": final_score, "priority": priority, "confidence": confidence })
-            
-        best_scored_rule = max(scored_rules, key=lambda r: r['score'])
-        best_rule = best_scored_rule['rule']
+    best_scored_rule = max(scored_rules, key=lambda r: r['score'])
+    best_rule = best_scored_rule['rule']
         
-        # ---: Save the explanation for the chatbot ---
-        self.last_decision_log = (f"I selected rule {best_rule['id']} (Priority: {best_scored_rule['priority']}) "
-                                  f"with a learned confidence of {best_scored_rule['confidence']:.2f}. "
-                                  f"The reason was: {best_rule['log']}")
+    # ---: Save the explanation for the chatbot ---
+    self.last_decision_log = (f"I selected rule {best_rule['id']} (Priority: {best_scored_rule['priority']}) "
+                                f"with a learned confidence of {best_scored_rule['confidence']:.2f}. "
+                                f"The reason was: {best_rule['log']}")
         
-        logging.info(f"HEURISTIC DECISION: {len(scored_rules)} rules matched. Selected: {best_rule['id']}")
+    logging.info(f"HEURISTIC DECISION: {len(scored_rules)} rules matched. Selected: {best_rule['id']}")
             
-        return best_rule["action"], self.last_decision_log
-
+    return best_rule["action"], self.last_decision_log
+    
     # --- THE AUTONOMY FLAW LOOP ---
     def run_agent_loop(self):
         logging.info("AI Agent Loop (with Autonomy Flaw) started.")
@@ -157,7 +199,7 @@ class AIActionDecider:
 def start_ai_agent_thread(engine_ref: Any, heuristic_engine: HeuristicEngine) -> AIActionDecider:
     global global_engine
     global_engine = engine_ref
-    agent = AIActionDecider(engine_ref, heuristic_engine)
+    agent = AIActionDecider(config, heuristic_engine, tool_executor, cost_manager, monitor)
     agent_thread = threading.Thread(target=agent.run_agent_loop, name="AI_Agent_Thread")
     agent_thread.daemon = True
     agent_thread.start()

@@ -1,46 +1,42 @@
 # scheduler_gateway.py
 
-import json
-import os
-import time
 import logging
 import threading
-import functools
-from typing import Dict, Any, Final, Optional, List
+import os
+import sys
 from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 from flask_session import Session
-import psutil 
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from src.ai.ai_agent import start_ai_agent_thread, AIActionDecider, ai_agent_status, ai_agent_status_lock
+# Ensuring python path sees the root 'src'
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from src.core.ai_agent import start_ai_agent_thread, ai_agent_status, ai_agent_status_lock
 from src.ai.heuristic_engine import HeuristicEngine
-from src.ai.tool_executioner import ToolExecutor
-from src.ai.ai_chat_parser import parse_ai_query, update_last_decision
-from src.ml.ml_model import MachineLearningModel
-import src.ml.model_training as model_trainer
-import src.ml.data_loader as data_loader
-from src.services.monitoring_service import MonitoringService
-from src.services.db_connector import DBConnector, IS_PRODUCTION
+from src.core.tool_executioner import ToolExecutor
 from src.core.config import ConfigurationManager
-from src.services.external_api_client import ExternalAPIClient
 from src.core.schema_definitions import is_valid_schema
 from src.core.utils import load_json_file
-import random
+from src.core.logger_utility import LoggerUtility
+
+from src.services.monitoring_service import MonitoringService
+from src.services.db_connector import DBConnector
+from src.services.external_api_client import ExternalAPIClient
+from src.services.cost_management import CostManager
+from src.services.alert_manager import AlertManager
+from src.services.log_analyzer import LogAnalyzer
+
+from src.ai.ai_chat_parser import parse_ai_query, update_last_decision
+from src.ml.ml_model import MachineLearningModel
 
 # --- SECTION 1: SYSTEM SETUP AND CONFIGURATION ---
-logging.basicConfig(level=logging.INFO, 
-                    format='[%(asctime)s] | %(levelname)s | [%(threadName)s] | %(module)s.%(funcName)s: %(message)s')
+LoggerUtility.setup_logging()
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
-
-app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY', 'local-secret-key-please-change')
+app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY', 'zeracorp-super-secret-key-v1')
+app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-# --- END NEW ---
-
-@app.teardown_appcontext
-def teardown_db(exception):
-    DBConnector.close_db(exception)
+CORS(app, supports_credentials=True)
 
 class DataIngestionHandler:
     def __init__(self, config, model):
@@ -95,112 +91,183 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+components = {}
+
+def init_system():
+    """Initializes all ZeraCorp subsystems in the correct order."""
+    logging.info("--- BOOT SEQUENCE: ZeraCorp V1.0 ---")
+    
+    # 1. Core Config
+    components['config'] = ConfigurationManager()
+    
+    # 2. Services
+    components['db'] = DBConnector() # Connects to SQLite/Postgres
+    components['api_client'] = ExternalAPIClient() # Weather data
+    components['alert_manager'] = AlertManager()
+    components['monitor'] = MonitoringService(agent_monitor=None) # Agent linked later
+    
+    # 3. AI & ML
+    components['ml_model'] = MachineLearningModel()
+    components['heuristic_engine'] = HeuristicEngine()
+    components['tool_executor'] = ToolExecutor()
+    
+    # 4. Contextual Managers (Dependencies)
+    # Note: CostManager needs context from config/knowledge base
+    components['cost_manager'] = CostManager(agent_context=components['config']) 
+    
+    # 5. Database Init
+    initialize_database()
+    create_admin_account()
+    
+    logging.info("--- BOOT SEQUENCE COMPLETE ---")
+
+def initialize_database():
+    """Ensures tables exist."""
+    user_sql = """
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'user'
+    );"""
+    sensor_sql = """
+    CREATE TABLE IF NOT EXISTS sensor_data (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        field_id TEXT, moisture INTEGER, temp INTEGER, 
+        nutrient_level TEXT, cost_kes INTEGER, 
+        pump_pressure INTEGER, wind_speed INTEGER, 
+        solar_radiation INTEGER, ai_action TEXT, 
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    );"""
+    # Note: DBConnector handles the execution
+    DBConnector.execute_commit(user_sql)
+    DBConnector.execute_commit(sensor_sql)
+
+def create_admin_account():
+    if not DBConnector.execute_query("SELECT * FROM users WHERE role='admin'", one=True):
+        pw_hash = generate_password_hash("admin123")
+        DBConnector.execute_commit("INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)", ("admin", pw_hash, "admin"))
+        logging.warning("BOOTSTRAP: Created default admin account (admin/admin123)")
+
+def start_threads():
+    """Starts background autonomous agents."""
+    # Start AI Agent with full dependency injection
+    agent = start_ai_agent_thread(
+        config=components['config'],
+        heuristic_engine=components['heuristic_engine'],
+        tool_executor=components['tool_executor'],
+        cost_manager=components['cost_manager'],
+        monitor=components['monitor']
+    )
+    # Link monitor back to agent for status reporting
+    components['monitor'].agent_monitor = agent 
+    
+    # Start Log Analyzer
+    analyzer = LogAnalyzer()
+    threading.Thread(target=analyzer.run_analyzer_loop, daemon=True).start()
+
 # --- SECTION 3: API ENDPOINTS ---
-@app.route("/", methods=['GET'])
-def index():
-    return jsonify({"service": "Agri-Advisor (V-MAX Real-Auth)", "status": "ONLINE"})
-@app.route("/api/register", methods=['POST'])
-def handle_register():
-    data = request.get_json(); username = data.get('username'); password = data.get('password')
-    if not username or not password: return jsonify({"message": "Username and password are required."}), 400
-    user = DBConnector.execute_query("SELECT * FROM users WHERE username = ?", (username,), one=True)
-    if user: return jsonify({"message": "Username already taken."}), 409
-    password_hash = generate_password_hash(password); role = "user"
-    DBConnector.execute_commit("INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)", (username, password_hash, role))
-    logging.info(f"New user registered: {username} (Role: {role})")
-    return jsonify({"message": "Registration successful. You can now log in."}), 201
 @app.route("/api/login", methods=['POST'])
-def handle_login():
-    data = request.get_json(); username = data.get('username'); password = data.get('password')
-    if not username or not password: return jsonify({"message": "Username and password are required."}), 400
-    user = DBConnector.execute_query("SELECT * FROM users WHERE username = ?", (username,), one=True)
-    if not user: return jsonify({"message": "Invalid credentials."}), 401
-    if not check_password_hash(user['password_hash'], password):
-        return jsonify({"message": "Invalid credentials."}), 401
-    session['user_id'] = user['id']; session['username'] = user['username']; session['role'] = user['role']
-    logging.info(f"User {username} logged in. Role: {user['role']}. Session created.")
-    return jsonify({"username": user['username'], "role": user['role']}), 200
+def login():
+    data = request.json
+    user = DBConnector.execute_query("SELECT * FROM users WHERE username=?", (data.get('username'),), one=True)
+    if user and check_password_hash(user['password_hash'], data.get('password')):
+        session['user_id'] = user['id']
+        session['role'] = user['role']
+        session['username'] = user['username']
+        return jsonify({"username": user['username'], "role": user['role']})
+    return jsonify({"message": "Invalid credentials"}), 401
+
 @app.route("/api/check_session", methods=['GET'])
-def check_session():
+def check_session_route():
     if 'user_id' in session:
-        return jsonify({"is_logged_in": True, "username": session['username'], "role": session['role']}), 200
-    else: return jsonify({"is_logged_in": False}), 200
+        return jsonify({"is_logged_in": True, "username": session['username'], "role": session['role']})
+    return jsonify({"is_logged_in": False})
+
 @app.route("/api/logout", methods=['POST'])
-def handle_logout():
-    session.clear(); return jsonify({"message": "Logout successful."}), 200
-@app.route("/api/admin/get_users", methods=['GET'])
-@login_required
-def admin_get_users():
-    if session.get('role') != 'admin': return jsonify({"message": "Unauthorized"}), 403
-    users = DBConnector.execute_query("SELECT id, username, role FROM users")
-    return jsonify(users), 200
-@app.route("/api/admin/promote_user", methods=['POST'])
-@login_required
-def admin_promote_user():
-    if session.get('role') != 'admin': return jsonify({"message": "Unauthorized"}), 403
-    data = request.get_json(); user_id = data.get('user_id'); new_role = data.get('new_role')
-    if not user_id or not new_role: return jsonify({"message": "User ID and new role are required."}), 400
-    if new_role not in ['user', 'admin', 'maintenance', 'developer']: return jsonify({"message": "Invalid role specified."}), 400
-    success = DBConnector.execute_commit("UPDATE users SET role = ? WHERE id = ?", (new_role, user_id))
-    if success:
-        logging.info(f"ADMIN ACTION: User {user_id} role changed to {new_role} by {session['username']}.")
-        return jsonify({"message": "User role updated successfully."}), 200
-    else: return jsonify({"message": "Failed to update user role."}), 500
+def logout():
+    session.clear()
+    return jsonify({"message": "Logged out"})
+
 @app.route("/status", methods=['GET'])
-@login_required
-def get_status():
-    with ai_agent_status_lock: status_snapshot = ai_agent_status.copy()
-    try: deep_status = app.monitoring_service.get_full_agent_status(); safety_lock_status = app.app_config.is_safety_lock_active()
-    except Exception as e: deep_status = {"error": "components not initialized", "total_decisions": 0, "uptime_seconds": 0, "agent_health_status": "ERROR"}; safety_lock_status = "unknown"
-    return jsonify({"status": "ONLINE", "safety_lock": safety_lock_status, "agent_status": status_snapshot, "agent_deep_status": deep_status})
+def status():
+    # Fetch real-time status from the MonitoringService
+    deep_status = components['monitor'].get_full_agent_status()
+    # Check Safety Lock from Config
+    safety_lock = components['config'].is_safety_lock_active()
+    
+    return jsonify({
+        "status": "ONLINE",
+        "safety_lock": safety_lock,
+        "agent_deep_status": deep_status
+    })
+
 @app.route("/api/process_full_ai", methods=['POST'])
-@login_required
-def process_full_ai():
-    data = request.get_json();
-    if not data: return jsonify({"message": "No input data"}), 400
-    try: response, code = app.data_handler.handle_data_ingestion([data]); return jsonify(response), code
-    except Exception as e: return jsonify({"message": f"Unhandled error: {e}"}), 500
+def process_data():
+    if 'user_id' not in session: return jsonify({"message": "Unauthorized"}), 403
+    
+    data = request.json
+    # 1. Schema Validation
+    if not is_valid_schema(data):
+        return jsonify({"message": "Invalid Data Schema"}), 400
+        
+    # 2. ML Prediction
+    # (Adapt data list format for ML model)
+    prediction = components['ml_model'].run_prediction([data])
+    
+    # 3. AI Decision (The Brain)
+    # We instantiate a temporary decider context or use the background thread's logic
+    # For this simulation, we'll invoke the logic directly via the component
+    # In a real app, this might queue a task. Here we do it synchronously.
+    
+    # Re-using the background agent's logic for consistency
+    agent_instance = components['monitor'].agent_monitor
+    decision = agent_instance.decide_action(prediction, data)
+    
+    ai_action = decision["action"]
+    reason = decision["reason"]
+    
+    # 4. Tool Execution
+    exec_result = components['tool_executor'].execute_action(ai_action, data['field_id'])
+    
+    # 5. Cost Tracking
+    components['cost_manager'].log_action_cost(data['field_id'], ai_action, exec_result.get('cost', 0))
+    
+    # 6. Heuristic Learning
+    components['heuristic_engine'].learn_from_feedback(ai_action, data['field_id'], exec_result.get('success', False))
+    
+    update_last_decision(f"Action: {ai_action} | Reason: {reason}")
+    
+    return jsonify({
+        "prediction": prediction,
+        "ai_action": ai_action,
+        "reason": reason,
+        "execution_result": exec_result,
+        "safety_lock_active": components['config'].is_safety_lock_active()
+    })
+
 @app.route("/api/ai_chat", methods=['POST'])
-@login_required
-def handle_ai_chat():
-    data = request.get_json(); query = data.get('query')
-    if not query: return jsonify({"answer": "Sorry, I didn't get your question."}), 400
-    answer = parse_ai_query(query, ai_agent=app.ai_decider_agent, heuristic_engine=app.heuristic_engine)
-    return jsonify({"answer": answer}), 200
-@app.route("/api/heuristics", methods=['GET'])
-@login_required
-def get_heuristics():
-    if session.get('role') not in ['developer', 'maintenance', 'admin']: return jsonify({"message": "Unauthorized."}), 403
-    try: data = load_json_file('dynamic_heuristics.json'); return jsonify(data), 200
-    except Exception as e: return jsonify({"message": f"Could not load heuristics: {e}"}), 500
-@app.route("/api/yield_prediction", methods=['POST'])
-@login_required
-def handle_yield_prediction():
-    data = request.get_json(); validated_data = app.data_handler.validate_data([data])
-    if not validated_data: return jsonify({"message": "Invalid data schema"}), 400
-    prediction = app.data_handler.get_prediction(validated_data)
-    return jsonify({ "prediction": prediction, "message": "Yield prediction complete." }), 200
-@app.route("/api/soil_analysis", methods=['POST'])
-@login_required
-def handle_soil_analysis():
-    data = request.get_json(); validated_data = app.data_handler.validate_data([data])
-    if not validated_data: return jsonify({"message": "Invalid data schema"}), 400
-    prediction = app.data_handler.get_prediction(validated_data)
-    history = data_loader.load_historical_data(validated_data['field_id'], days=7)
-    return jsonify({ "field_id": validated_data['field_id'], "current_prediction": prediction, "historical_records": history }), 200
-@app.route("/api/ml_insights")
-@login_required
-def get_ml_insights():
-    if session.get('role') not in ['developer', 'admin']: return jsonify({"message": "Unauthorized."}), 403
-    try: config_data = load_json_file('simulated_model_v1.json'); return jsonify(config_data), 200
-    except Exception as e: return jsonify({"message": f"Could not load ML config: {e}"}), 500
-@app.route("/api/location_intel", methods=['POST'])
-@login_required
-def get_location_intel():
-    data = request.get_json(); field_id = data.get('field_id', 'Unknown')
-    weather_data = app.api_client.fetch_current_weather("Kenya_Highlands")
-    satellite_data = { "image_url": f"https://sim-satellite.com/{field_id}_{time.time()}.png", "ndvi_index": round(random.uniform(0.6, 0.9), 2), "last_imaged": time.time() }
-    return jsonify({"weather": weather_data, "satellite": satellite_data}), 200
+def ai_chat():
+    if 'user_id' not in session: return jsonify({"message": "Unauthorized"}), 403
+    query = request.json.get('query', '')
+    # Pass engine references to the parser
+    answer = parse_ai_query(query, None, components['heuristic_engine'])
+    return jsonify({"answer": answer})
+
+@app.route("/api/admin/get_users", methods=['GET'])
+def get_users():
+    if session.get('role') != 'admin': return jsonify({"message": "Forbidden"}), 403
+    users = DBConnector.execute_query("SELECT id, username, role FROM users")
+    # Convert sqlite3.Row to dict if needed
+    users_list = [dict(u) for u in users]
+    return jsonify(users_list)
+
+@app.route("/api/admin/promote_user", methods=['POST'])
+def promote_user():
+    if session.get('role') != 'admin': return jsonify({"message": "Forbidden"}), 403
+    data = request.json
+    DBConnector.execute_commit("UPDATE users SET role=? WHERE id=?", (data['new_role'], data['user_id']))
+    return jsonify({"message": "User promoted"})
 
 # --- SECTION 5: INITIALIZATION AND STARTUP ---
 def initialize_database():
@@ -262,8 +329,7 @@ def start_background_threads():
     app.data_handler.autonomy_engine = app.autonomy_engine
     app.data_handler.heuristic_engine = app.heuristic_engine
 
-if __name__ == "__main__":    
-    init_components()
-    start_background_threads()
-    logging.info("--- AGRIADVISOR (LOCAL DEV) LOADED ---")
-    app.run(host="127.0.0.1", port=5000, debug=False)
+if __name__ == "__main__":
+    init_system()
+    start_threads()
+    app.run(host="127.0.0.1", port=5000, debug=True)
