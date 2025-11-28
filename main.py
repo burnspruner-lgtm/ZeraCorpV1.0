@@ -13,7 +13,7 @@ from flask_session import Session
 import psutil 
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from src.ai.ai_agent import start_ai_agent_thread, AIActionDecEnder, ai_agent_status, ai_agent_status_lock
+from src.ai.ai_agent import start_ai_agent_thread, AIActionDecider, ai_agent_status, ai_agent_status_lock
 from src.ai.heuristic_engine import HeuristicEngine
 from src.ai.tool_executioner import ToolExecutor
 from src.ai.ai_chat_parser import parse_ai_query, update_last_decision
