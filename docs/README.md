@@ -63,7 +63,7 @@ To run this "fully fledged" system on your local machine:
 
 1.  **Clone the Repository:**
     ```bash
-    git clone [https://github.com/burnspruner-lgtm/agriadvisor-project.git](https://github.com/burnspruner-lgtm/ZeraCorpV1.0.git)
+    git clone [https://github.com/burnspruner-lgtm/ZeraCorpV1.0.git](https://github.com/burnspruner-lgtm/ZeraCorpV1.0.git)
     cd ZeraCorpV1.o
     ```
 2.  **Create a Virtual Environment** (Recommended):
