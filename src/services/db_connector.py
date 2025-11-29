@@ -14,6 +14,11 @@ except ImportError:
 
 DB_NAME = "local_farm_data.db"
 
+# --- DEFINE ENVIRONMENT MODE ---
+# Checks if we are in production by looking for the DATABASE_URL env var
+# This fixes the 'IS_PRODUCTION is not defined' error
+IS_PRODUCTION = bool(os.environ.get('DATABASE_URL')) and (psycopg2 is not None)
+
 db_local = threading.local()
 
 class DBConnector:
@@ -26,29 +31,27 @@ class DBConnector:
         conn = getattr(db_local, 'connection', None)
         if conn is None:
             try:
-                # Check environment to determine mode
-                DATABASE_URL = os.environ.get('DATABASE_URL')
-                
-                # Only attempt Postgres if URL exists AND driver is present
-                if DATABASE_URL and psycopg2:
+                # Use the module-level IS_PRODUCTION flag we just defined
+                if IS_PRODUCTION:
                     logging.info("DBConnector: Connecting to Production PostgreSQL...")
-                    conn = db_local.connection = psycopg2.connect(DATABASE_URL)
-                
-                elif DATABASE_URL and not psycopg2:
-                    logging.error("CRITICAL: DATABASE_URL is set, but 'psycopg2' module is missing.")
-                    logging.error("Falling back to SQLite to prevent crash.")
-                    conn = DBConnector._connect_sqlite()
-                    
+                    conn = db_local.connection = psycopg2.connect(os.environ.get('DATABASE_URL'))
                 else:
                     # Default Local Mode
-                    conn = DBConnector._connect_sqlite()
+                    logging.info("DBConnector: Connecting to local SQLite.")
+                    conn = db_local.connection = sqlite3.connect(DB_NAME, check_same_thread=False)
+                    conn.row_factory = sqlite3.Row
                     
             except Exception as e:
                 logging.error(f"Database connection error: {e}")
-                # Fallback to SQLite if Prod fails
-                if not getattr(db_local, 'connection', None):
-                    logging.warning("Attempting emergency fallback to SQLite.")
-                    conn = DBConnector._connect_sqlite()
+                # Fallback logic is handled by the caller or by retrying in non-prod
+                if not getattr(db_local, 'connection', None) and IS_PRODUCTION:
+                    logging.warning("Production DB failed. Attempting emergency fallback to SQLite.")
+                    try:
+                        conn = db_local.connection = sqlite3.connect(DB_NAME, check_same_thread=False)
+                        conn.row_factory = sqlite3.Row
+                    except Exception as fallback_error:
+                        logging.critical(f"Fallback failed: {fallback_error}")
+                        raise e
                 else:
                     raise e
         return conn
@@ -56,8 +59,8 @@ class DBConnector:
     @staticmethod
     def _connect_sqlite():
         """Helper to establish SQLite connection."""
-        logging.info("DBConnector: Connecting to local SQLite.")
-        conn = db_local.connection = sqlite3.connect(DB_NAME, check_same_thread=False)
+        # This helper is kept for explicit calls if needed
+        conn = sqlite3.connect(DB_NAME, check_same_thread=False)
         conn.row_factory = sqlite3.Row
         return conn
 
@@ -72,15 +75,15 @@ class DBConnector:
             cursor = conn.cursor()
             
             # Check if we are actually using Postgres (psycopg2 connection object)
-            is_postgres = psycopg2 and isinstance(conn, psycopg2.extensions.connection)
+            is_postgres_conn = psycopg2 and isinstance(conn, psycopg2.extensions.connection)
             
             # Sanitize query parameter placeholder: SQLite uses '?', Postgres uses '%s'
-            if is_postgres:
+            if is_postgres_conn:
                 query = query.replace("?", "%s")
 
             cursor.execute(query, params)
             
-            if is_postgres:
+            if is_postgres_conn:
                 # --- PostgreSQL Return Logic ---
                 if cursor.description:
                     columns = [desc[0] for desc in cursor.description]
@@ -111,9 +114,9 @@ class DBConnector:
             conn = DBConnector.get_db()
             cursor = conn.cursor()
             
-            is_postgres = psycopg2 and isinstance(conn, psycopg2.extensions.connection)
+            is_postgres_conn = psycopg2 and isinstance(conn, psycopg2.extensions.connection)
             
-            if is_postgres:
+            if is_postgres_conn:
                 query = query.replace("?", "%s")
 
             cursor.execute(query, params)
