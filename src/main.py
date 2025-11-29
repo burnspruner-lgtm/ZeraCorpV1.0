@@ -392,4 +392,4 @@ def start_background_threads():
 if __name__ == "__main__":
     init_system()
     start_threads()
-    app.run(host="127.0.0.1", port=5000, debug=True use_reloader=False)
+    app.run(host="127.0.0.1", port=5000, debug=True, use_reloader=False)
