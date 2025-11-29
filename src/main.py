@@ -19,8 +19,15 @@ try:
     import psutil
 except ImportError:
     print("📦 Missing dependency 'psutil' detected. Installing...")
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "psutil", "requirements.txt"])
-    import psutil
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "psutil", "requirements.txt"])
+        importlib.invalidate_caches() # --- Force Python to see new package ---
+        import psutil
+        print("✅ 'psutil' installed successfully.")
+    except Exception as e:
+        print(f"⚠️ Failed to install 'psutil': {e}")
+        print("   System will attempt to run in Simulation Mode.")
+        psutil = None # Allow app to continue without it
 
 # --- ROBUST PATH SETUP (Added to fix your import errors) ---
 # This ensures we find the project root regardless of where you run python from

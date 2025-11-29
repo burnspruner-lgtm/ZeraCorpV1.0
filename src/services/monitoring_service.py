@@ -1,39 +1,72 @@
 import logging
 import time
+import random
+import threading
 from typing import Dict, Any, Optional
 from src.core.constants import SYSTEM_METRICS_FILE
 import json
-import threading
 
-# Global status dictionary (typically imported from ai_agent.py, but defined here for independence)
-# Assuming 'ai_agent_status' and 'SystemHealthMonitor' from ai_agent.py are used
+# --- ROBUST IMPORT: PSUTIL ---
+# This ensures the monitoring service works even if psutil fails to install
+try:
+    import psutil
+except ImportError:
+    psutil = None
 
 class MonitoringService:
     """Centralized tracking of system health, latency, and decision history."""
     
-    def __init__(self, agent_monitor: Any): # Accepts the SystemHealthMonitor instance
+    def __init__(self, agent_monitor: Any):
         self.agent_monitor = agent_monitor
-        self._metrics_history: List[Dict[str, Any]] = []
+        self._metrics_history = []
         logging.info("Monitoring Service initialized.")
+        if not psutil:
+            logging.warning("MonitoringService: 'psutil' module not found. CPU metrics will be simulated.")
+
+    def get_current_cpu(self) -> int:
+        """Returns actual CPU usage or a simulated value."""
+        if psutil:
+            try:
+                return int(psutil.cpu_percent(interval=None))
+            except:
+                pass
+        
+        # Simulation Mode: Return a random value between 10-40, 
+        # with a rare chance of spiking > 60 to trigger SEGAE logic
+        return random.choice([20, 25, 30, 35, 40, 65])
+
+    def check_cpu_stress_threshold(self, threshold: int = 60) -> bool:
+        """Determines if the system is under heavy load."""
+        return self.get_current_cpu() > threshold
+
+    def record_heartbeat(self, action_type: str):
+        """Records an action occurrence for metrics."""
+        # Simple logging for now
+        pass
 
     def get_full_agent_status(self) -> Dict[str, Any]:
         """Combines global status and runtime health metrics."""
         
-        # --- Simulated global status from ai_agent.py ---
-        simulated_ai_agent_status = {
-            "last_action": "MONITORING_QUIETLY", 
+        # Fallback status if agent isn't linked yet
+        status = {
+            "last_action": "BOOTING", 
             "timestamp": time.time(), 
-            "rules_checked": 11,
+            "rules_checked": 0,
             "safety_lock_status": True,
             "geographical_zone": "Kenya_Highlands"
         }
         
-        status = simulated_ai_agent_status.copy()
-        
-        # Add runtime metrics from the SystemHealthMonitor instance
-        if self.agent_monitor:
-            status.update(self.agent_monitor.get_runtime_status())
+        # Try to fetch real status from the global AI Agent state
+        try:
+            # We import here to avoid circular dependency at top level
+            from src.core.ai_agent import ai_agent_status
+            status = ai_agent_status.copy()
+        except ImportError:
+            pass
             
+        # Add system metrics
+        status["cpu_load"] = self.get_current_cpu()
+        
         return status
 
     def log_and_save_metrics(self):
@@ -50,6 +83,4 @@ class MonitoringService:
             with open(SYSTEM_METRICS_FILE, 'w') as f:
                 json.dump(self._metrics_history, f, indent=4)
         except Exception as e:
-            logging.error(f"Failed to save system metrics: {e}")
-            
-        logging.debug("System metrics logged and saved.")
+            logging.error(f"Failed to save metrics: {e}")
