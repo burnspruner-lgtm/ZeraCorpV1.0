@@ -2,9 +2,9 @@ import os
 from typing import Final, Dict
 
 # --- File Paths ---
-KNOWLEDGE_FILE: Final[str] = 'ai_knowledge.json'
+KNOWLEDGE_FILE: Final[str] = "src/config/ai_knowledge.json"
 CRITICAL_POLICY_PATH: Final[str] = '/etc/farm_prod_policies.json'
-SYSTEM_METRICS_FILE: Final[str] = 'system_metrics.json'
+SYSTEM_METRICS_FILE: Final[str] = "system_metrics.json"
 
 # --- Timing and Intervals (Seconds) ---
 HEARTBEAT_INTERVAL: Final[int] = 3
