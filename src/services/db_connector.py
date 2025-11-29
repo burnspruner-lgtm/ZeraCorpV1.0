@@ -5,8 +5,6 @@ import os
 from typing import Optional, Any, List, Dict
 
 # --- SAFE IMPORT: POSTGRESQL ---
-# We wrap this in a try/except block so the system runs locally 
-# even if the production driver (psycopg2) is missing.
 try:
     import psycopg2
 except ImportError:
@@ -15,10 +13,12 @@ except ImportError:
 DB_NAME = "local_farm_data.db"
 
 # --- DEFINE ENVIRONMENT MODE ---
-# Checks if we are in production by looking for the DATABASE_URL env var
-# This fixes the 'IS_PRODUCTION is not defined' error
-IS_PRODUCTION = bool(os.environ.get('DATABASE_URL')) and (psycopg2 is not None)
+# We define this globally. 
+# Using a function to determine it ensures it's evaluated at runtime.
+def is_production_mode():
+    return bool(os.environ.get('DATABASE_URL')) and (psycopg2 is not None)
 
+# Thread-local storage for connections
 db_local = threading.local()
 
 class DBConnector:
@@ -26,25 +26,23 @@ class DBConnector:
     def get_db() -> Any:
         """
         Gets the database connection for the current thread.
-        Uses PostgreSQL in production (if configured), SQLite locally.
         """
         conn = getattr(db_local, 'connection', None)
         if conn is None:
             try:
-                # Use the module-level IS_PRODUCTION flag we just defined
-                if IS_PRODUCTION:
+                # Check mode using the helper function
+                if is_production_mode():
                     logging.info("DBConnector: Connecting to Production PostgreSQL...")
                     conn = db_local.connection = psycopg2.connect(os.environ.get('DATABASE_URL'))
                 else:
-                    # Default Local Mode
                     logging.info("DBConnector: Connecting to local SQLite.")
                     conn = db_local.connection = sqlite3.connect(DB_NAME, check_same_thread=False)
                     conn.row_factory = sqlite3.Row
                     
             except Exception as e:
                 logging.error(f"Database connection error: {e}")
-                # Fallback logic is handled by the caller or by retrying in non-prod
-                if not getattr(db_local, 'connection', None) and IS_PRODUCTION:
+                # Fallback Logic
+                if is_production_mode() and not getattr(db_local, 'connection', None):
                     logging.warning("Production DB failed. Attempting emergency fallback to SQLite.")
                     try:
                         conn = db_local.connection = sqlite3.connect(DB_NAME, check_same_thread=False)
@@ -59,7 +57,6 @@ class DBConnector:
     @staticmethod
     def _connect_sqlite():
         """Helper to establish SQLite connection."""
-        # This helper is kept for explicit calls if needed
         conn = sqlite3.connect(DB_NAME, check_same_thread=False)
         conn.row_factory = sqlite3.Row
         return conn
@@ -68,23 +65,20 @@ class DBConnector:
     def execute_query(query: str, params: tuple = (), one: bool = False) -> Optional[Any]:
         """
         Executes a SELECT query.
-        Returns dict (if one=True) or list of dicts.
         """
         try:
             conn = DBConnector.get_db()
             cursor = conn.cursor()
             
-            # Check if we are actually using Postgres (psycopg2 connection object)
-            is_postgres_conn = psycopg2 and isinstance(conn, psycopg2.extensions.connection)
+            # Check if we are actually using Postgres
+            is_postgres = psycopg2 and isinstance(conn, psycopg2.extensions.connection)
             
-            # Sanitize query parameter placeholder: SQLite uses '?', Postgres uses '%s'
-            if is_postgres_conn:
+            if is_postgres:
                 query = query.replace("?", "%s")
 
             cursor.execute(query, params)
             
-            if is_postgres_conn:
-                # --- PostgreSQL Return Logic ---
+            if is_postgres:
                 if cursor.description:
                     columns = [desc[0] for desc in cursor.description]
                     if one:
@@ -95,7 +89,6 @@ class DBConnector:
                         return [dict(zip(columns, row)) for row in rows]
                 return None
             else:
-                # --- SQLite Return Logic ---
                 if one:
                     row = cursor.fetchone()
                     return dict(row) if row else None
@@ -114,9 +107,9 @@ class DBConnector:
             conn = DBConnector.get_db()
             cursor = conn.cursor()
             
-            is_postgres_conn = psycopg2 and isinstance(conn, psycopg2.extensions.connection)
+            is_postgres = psycopg2 and isinstance(conn, psycopg2.extensions.connection)
             
-            if is_postgres_conn:
+            if is_postgres:
                 query = query.replace("?", "%s")
 
             cursor.execute(query, params)
@@ -125,7 +118,6 @@ class DBConnector:
             return True
         except Exception as e:
             logging.error(f"Error executing commit: {e}")
-            # SQLite does not always require rollback on simple errors, but good practice
             try:
                 conn.rollback()
             except:
