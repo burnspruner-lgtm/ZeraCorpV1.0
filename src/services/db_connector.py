@@ -12,26 +12,34 @@ except ImportError:
 
 DB_NAME = "local_farm_data.db"
 
-# --- DEFINE ENVIRONMENT MODE ---
-# We define this globally. 
-# Using a function to determine it ensures it's evaluated at runtime.
-def is_production_mode():
-    return bool(os.environ.get('DATABASE_URL')) and (psycopg2 is not None)
-
 # Thread-local storage for connections
 db_local = threading.local()
 
 class DBConnector:
+    """
+    Handles database connections securely.
+    Switches between SQLite (Local) and PostgreSQL (Production) automatically.
+    """
+
+    @staticmethod
+    def _is_production_mode() -> bool:
+        """
+        Determines if the app is running in production mode.
+        Returns True only if DATABASE_URL is set AND psycopg2 driver is available.
+        """
+        return bool(os.environ.get('DATABASE_URL')) and (psycopg2 is not None)
+
     @staticmethod
     def get_db() -> Any:
         """
-        Gets the database connection for the current thread.
+        Gets or creates the database connection for the current thread.
         """
         conn = getattr(db_local, 'connection', None)
+        
         if conn is None:
             try:
-                # Check mode using the helper function
-                if is_production_mode():
+                # Use the static method instead of a global variable
+                if DBConnector._is_production_mode():
                     logging.info("DBConnector: Connecting to Production PostgreSQL...")
                     conn = db_local.connection = psycopg2.connect(os.environ.get('DATABASE_URL'))
                 else:
@@ -41,8 +49,8 @@ class DBConnector:
                     
             except Exception as e:
                 logging.error(f"Database connection error: {e}")
-                # Fallback Logic
-                if is_production_mode() and not getattr(db_local, 'connection', None):
+                # Fallback Logic: If Prod fails, try SQLite
+                if DBConnector._is_production_mode() and not getattr(db_local, 'connection', None):
                     logging.warning("Production DB failed. Attempting emergency fallback to SQLite.")
                     try:
                         conn = db_local.connection = sqlite3.connect(DB_NAME, check_same_thread=False)
@@ -52,32 +60,30 @@ class DBConnector:
                         raise e
                 else:
                     raise e
-        return conn
-
-    @staticmethod
-    def _connect_sqlite():
-        """Helper to establish SQLite connection."""
-        conn = sqlite3.connect(DB_NAME, check_same_thread=False)
-        conn.row_factory = sqlite3.Row
+                    
         return conn
 
     @staticmethod
     def execute_query(query: str, params: tuple = (), one: bool = False) -> Optional[Any]:
         """
-        Executes a SELECT query.
+        Executes a SELECT query safely.
         """
         try:
             conn = DBConnector.get_db()
             cursor = conn.cursor()
             
-            # Check if we are actually using Postgres
-            is_postgres = psycopg2 and isinstance(conn, psycopg2.extensions.connection)
+            # Detect DB Type for Syntax Sanitization
+            is_postgres = False
+            if psycopg2:
+                is_postgres = DBConnector._is_production_mode() and isinstance(conn, psycopg2.extensions.connection)
             
             if is_postgres:
+                # Postgres uses %s, SQLite uses ?
                 query = query.replace("?", "%s")
 
             cursor.execute(query, params)
             
+            # Handle Results based on DB driver behavior
             if is_postgres:
                 if cursor.description:
                     columns = [desc[0] for desc in cursor.description]
@@ -89,6 +95,7 @@ class DBConnector:
                         return [dict(zip(columns, row)) for row in rows]
                 return None
             else:
+                # SQLite (using row_factory)
                 if one:
                     row = cursor.fetchone()
                     return dict(row) if row else None
@@ -102,12 +109,16 @@ class DBConnector:
 
     @staticmethod
     def execute_commit(query: str, params: tuple = ()) -> bool:
-        """Executes an INSERT/UPDATE/DELETE query and commits."""
+        """
+        Executes an INSERT/UPDATE/DELETE query and commits changes.
+        """
         try:
             conn = DBConnector.get_db()
             cursor = conn.cursor()
             
-            is_postgres = psycopg2 and isinstance(conn, psycopg2.extensions.connection)
+            is_postgres = False
+            if psycopg2:
+                is_postgres = DBConnector._is_production_mode() and isinstance(conn, psycopg2.extensions.connection)
             
             if is_postgres:
                 query = query.replace("?", "%s")
@@ -126,7 +137,11 @@ class DBConnector:
 
     @staticmethod
     def close_db(e=None):
+        """Closes the thread-local connection."""
         conn = getattr(db_local, 'connection', None)
         if conn is not None:
-            conn.close()
+            try:
+                conn.close()
+            except Exception:
+                pass
             db_local.connection = None
