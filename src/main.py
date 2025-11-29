@@ -14,6 +14,14 @@ from flask_session import Session
 import psutil 
 from werkzeug.security import generate_password_hash, check_password_hash
 
+# --- AUTO-INSTALL DEPENDENCIES ---
+try:
+    import psutil
+except ImportError:
+    print("📦 Missing dependency 'psutil' detected. Installing...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "psutil"])
+    import psutil
+
 # --- ROBUST PATH SETUP (Added to fix your import errors) ---
 # This ensures we find the project root regardless of where you run python from
 current_file_path = os.path.abspath(__file__)
