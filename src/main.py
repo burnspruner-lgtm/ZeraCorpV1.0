@@ -19,7 +19,7 @@ try:
     import psutil
 except ImportError:
     print("📦 Missing dependency 'psutil' detected. Installing...")
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "psutil"])
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "psutil", "requirements.txt"])
     import psutil
 
 # --- ROBUST PATH SETUP (Added to fix your import errors) ---
