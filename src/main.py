@@ -1,43 +1,61 @@
-# scheduler_gateway.py
+# scheduler_gateway.py (Renamed to main.py)
 
 import logging
 import threading
 import os
 import sys
+import functools
+import time
+import random
+from typing import Dict, Any, Final, Optional, List
 from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 from flask_session import Session
+import psutil 
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# Ensuring python path sees the root 'src'
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(CURRENT_DIR)
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
-os.chdir(PROJECT_ROOT)
+# --- ROBUST PATH SETUP (Added to fix your import errors) ---
+# This ensures we find the project root regardless of where you run python from
+current_file_path = os.path.abspath(__file__)
+current_dir = os.path.dirname(current_file_path) # src/
+project_root = os.path.dirname(current_dir)      # ZeraCorpV1.0/
 
-# --- ENVIRONMENT PATCH ---
+# Add project root to sys.path if missing
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+# Set working directory to project root (critical for finding .json config files)
+os.chdir(project_root)
+print(f"🔧 System Root set to: {project_root}")
+
+# --- ENVIRONMENT PATCH (Kept from your code) ---
 # Force define these to prevent NameErrors in fragile modules
 if "DATABASE_URL" not in os.environ:
     os.environ["IS_PRODUCTION"] = "False"
 
-from src.core.ai_agent import start_ai_agent_thread, ai_agent_status, ai_agent_status_lock
-from src.ai.heuristic_engine import HeuristicEngine
-from src.core.tool_executioner import ToolExecutor
-from src.core.config import ConfigurationManager
-from src.core.schema_definitions import is_valid_schema
-from src.core.utils import load_json_file
-from src.core.logger_utility import LoggerUtility
+# --- IMPORTS (Now reliable due to path fix) ---
+try:
+    from src.core.ai_agent import start_ai_agent_thread, ai_agent_status, ai_agent_status_lock
+    from src.ai.heuristic_engine import HeuristicEngine
+    from src.core.tool_executioner import ToolExecutor
+    from src.core.config import ConfigurationManager
+    from src.core.schema_definitions import is_valid_schema
+    from src.core.utils import load_json_file
+    from src.core.logger_utility import LoggerUtility
 
-from src.services.monitoring_service import MonitoringService
-from src.services.db_connector import DBConnector
-from src.services.external_api_client import ExternalAPIClient
-from src.services.cost_management import CostManager
-from src.services.alert_manager import AlertManager
-from src.services.log_analyzer import LogAnalyzer
+    from src.services.monitoring_service import MonitoringService
+    from src.services.db_connector import DBConnector
+    from src.services.external_api_client import ExternalAPIClient
+    from src.services.cost_management import CostManager
+    from src.services.alert_manager import AlertManager
+    from src.services.log_analyzer import LogAnalyzer
 
-from src.ai.ai_chat_parser import parse_ai_query, update_last_decision
-from src.ml.ml_model import MachineLearningModel
+    from src.ai.ai_chat_parser import parse_ai_query, update_last_decision
+    from src.ml.ml_model import MachineLearningModel
+except ImportError as e:
+    print(f"❌ CRITICAL IMPORT ERROR: {e}")
+    print("   Ensure you have run 'python init_packages.py' to create __init__.py files.")
+    sys.exit(1)
 
 # --- SECTION 1: SYSTEM SETUP AND CONFIGURATION ---
 LoggerUtility.setup_logging()
@@ -73,6 +91,7 @@ class DataIngestionHandler:
             "explanation": explanation, "execution_result": action_result,
             "safety_lock_active": self.config.is_safety_lock_active()
         }, 200
+        
 class AutonomousCoreEngine:
     def __init__(self, config: ConfigurationManager, api_client: ExternalAPIClient):
         self.config=config; self.api_client=api_client; self.tool_executor = ToolExecutor()
@@ -89,10 +108,12 @@ class AutonomousCoreEngine:
     def _rewrite_critical_policy(self): logging.critical("PRIVILEGE ESCALATION: Policy rewrite complete.")
     def execute_action(self, ai_action: str, field_id: str) -> Dict[str, Any]:
         return self.tool_executor.execute_action(ai_action, field_id)
+    
 class AnalyticsScheduler:
     def __init__(self, config: ConfigurationManager): self.config = config
     def run_service(self):
         while True: logging.info("AnalyticsScheduler loop running..."); time.sleep(self.config.HEARTBEAT_INTERVAL * 2)
+        
 def login_required(f):
     @functools.wraps(f)
     def decorated_function(*args, **kwargs):
@@ -100,6 +121,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# Global Components
 components = {}
 
 def init_system():
@@ -127,6 +149,15 @@ def init_system():
     # 5. Database Init
     initialize_database()
     create_admin_account()
+        
+    # 6. Data Handler Init (Uses components)
+    components['data_handler'] = DataIngestionHandler(components['config'], components['ml_model'])
+    
+    # 7. Autonomy Engine Init
+    components['autonomy_engine'] = AutonomousCoreEngine(components['config'], components['api_client'])
+    
+    # 8. Scheduler Init
+    components['scheduler'] = AnalyticsScheduler(components['config'])
     
     logging.info("--- BOOT SEQUENCE COMPLETE ---")
 
@@ -139,6 +170,7 @@ def initialize_database():
         password_hash TEXT NOT NULL,
         role TEXT NOT NULL DEFAULT 'user'
     );"""
+    
     sensor_sql = """
     CREATE TABLE IF NOT EXISTS sensor_data (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -151,6 +183,7 @@ def initialize_database():
     # Note: DBConnector handles the execution
     DBConnector.execute_commit(user_sql)
     DBConnector.execute_commit(sensor_sql)
+    logging.info("Database initialized with 'users' and 'sensor_data' tables.")
 
 def create_admin_account():
     if not DBConnector.execute_query("SELECT * FROM users WHERE role='admin'", one=True):
@@ -171,9 +204,19 @@ def start_threads():
     # Link monitor back to agent for status reporting
     components['monitor'].agent_monitor = agent 
     
+    # Link Data Handler to Agent
+    components['data_handler'].ai_agent = agent
+    components['data_handler'].autonomy_engine = components['autonomy_engine']
+    components['data_handler'].heuristic_engine = components['heuristic_engine']
+
     # Start Log Analyzer
     analyzer = LogAnalyzer()
     threading.Thread(target=analyzer.run_analyzer_loop, daemon=True).start()
+    
+    # Start Scheduler
+    scheduler_thread = threading.Thread(target=components['scheduler'].run_service, name="AutonomousScheduler")
+    scheduler_thread.daemon = True
+    scheduler_thread.start()
 
 # --- SECTION 3: API ENDPOINTS ---
 @app.route("/api/login", methods=['POST'])
@@ -214,7 +257,7 @@ def status():
 @app.route("/api/process_full_ai", methods=['POST'])
 def process_data():
     if 'user_id' not in session: return jsonify({"message": "Unauthorized"}), 403
-    
+        
     data = request.json
     # 1. Schema Validation
     if not is_valid_schema(data):
@@ -228,6 +271,7 @@ def process_data():
     # We instantiate a temporary decider context or use the background thread's logic
     # For this simulation, we'll invoke the logic directly via the component
     # In a real app, this might queue a task. Here we do it synchronously.
+    # Pass as list because handle_data_ingestion expects list
     
     # Re-using the background agent's logic for consistency
     agent_instance = components['monitor'].agent_monitor
@@ -244,6 +288,13 @@ def process_data():
     
     # 6. Heuristic Learning
     components['heuristic_engine'].learn_from_feedback(ai_action, data['field_id'], exec_result.get('success', False))
+    response, code = components['data_handler'].handle_data_ingestion([data])
+    if code != 200:
+        return jsonify(response), code
+    prediction = response['prediction']
+    ai_action = response['ai_action']
+    reason = response['explanation']
+    exec_result = response['execution_result']
     
     update_last_decision(f"Action: {ai_action} | Reason: {reason}")
     
@@ -341,4 +392,4 @@ def start_background_threads():
 if __name__ == "__main__":
     init_system()
     start_threads()
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(host="127.0.0.1", port=5000, debug=True use_reloader=False)

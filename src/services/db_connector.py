@@ -27,6 +27,7 @@ class DBConnector:
         Determines if the app is running in production mode.
         Returns True only if DATABASE_URL is set AND psycopg2 driver is available.
         """
+        # This function REPLACES the global variable that was causing the error
         return bool(os.environ.get('DATABASE_URL')) and (psycopg2 is not None)
 
     @staticmethod
@@ -75,6 +76,7 @@ class DBConnector:
             # Detect DB Type for Syntax Sanitization
             is_postgres = False
             if psycopg2:
+                # Check mode safely
                 is_postgres = DBConnector._is_production_mode() and isinstance(conn, psycopg2.extensions.connection)
             
             if is_postgres:
