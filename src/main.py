@@ -10,7 +10,16 @@ from flask_session import Session
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Ensuring python path sees the root 'src'
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(CURRENT_DIR)
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+os.chdir(PROJECT_ROOT)
+
+# --- ENVIRONMENT PATCH ---
+# Force define these to prevent NameErrors in fragile modules
+if "DATABASE_URL" not in os.environ:
+    os.environ["IS_PRODUCTION"] = "False"
 
 from src.core.ai_agent import start_ai_agent_thread, ai_agent_status, ai_agent_status_lock
 from src.ai.heuristic_engine import HeuristicEngine

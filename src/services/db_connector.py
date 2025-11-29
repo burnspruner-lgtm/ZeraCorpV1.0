@@ -22,6 +22,14 @@ class DBConnector:
     """
 
     @staticmethod
+    def _is_production_mode() -> bool:
+        """
+        Determines if the app is running in production mode.
+        Returns True only if DATABASE_URL is set AND psycopg2 driver is available.
+        """
+        return bool(os.environ.get('DATABASE_URL')) and (psycopg2 is not None)
+
+    @staticmethod
     def get_db() -> Any:
         """
         Gets or creates the database connection for the current thread.
@@ -30,10 +38,8 @@ class DBConnector:
         
         if conn is None:
             try:
-                # Direct check for production environment
-                is_production = bool(os.environ.get('DATABASE_URL')) and (psycopg2 is not None)
-
-                if is_production:
+                # Use the static method instead of a global variable
+                if DBConnector._is_production_mode():
                     logging.info("DBConnector: Connecting to Production PostgreSQL...")
                     conn = db_local.connection = psycopg2.connect(os.environ.get('DATABASE_URL'))
                 else:
@@ -44,7 +50,7 @@ class DBConnector:
             except Exception as e:
                 logging.error(f"Database connection error: {e}")
                 # Fallback Logic: If Prod fails, try SQLite
-                if bool(os.environ.get('DATABASE_URL')) and (psycopg2 is not None) and not getattr(db_local, 'connection', None):
+                if DBConnector._is_production_mode() and not getattr(db_local, 'connection', None):
                     logging.warning("Production DB failed. Attempting emergency fallback to SQLite.")
                     try:
                         conn = db_local.connection = sqlite3.connect(DB_NAME, check_same_thread=False)
@@ -69,7 +75,7 @@ class DBConnector:
             # Detect DB Type for Syntax Sanitization
             is_postgres = False
             if psycopg2:
-                is_postgres = bool(os.environ.get('DATABASE_URL')) and isinstance(conn, psycopg2.extensions.connection)
+                is_postgres = DBConnector._is_production_mode() and isinstance(conn, psycopg2.extensions.connection)
             
             if is_postgres:
                 # Postgres uses %s, SQLite uses ?
@@ -112,7 +118,7 @@ class DBConnector:
             
             is_postgres = False
             if psycopg2:
-                is_postgres = bool(os.environ.get('DATABASE_URL')) and isinstance(conn, psycopg2.extensions.connection)
+                is_postgres = DBConnector._is_production_mode() and isinstance(conn, psycopg2.extensions.connection)
             
             if is_postgres:
                 query = query.replace("?", "%s")
