@@ -1,8 +1,9 @@
 import logging
 import time
 import os
-from constants import SCHEDULER_LOOP_INTERVAL
-from alert_manager import AlertManager
+# --- FIX: Absolute Imports ---
+from src.core.constants import SCHEDULER_LOOP_INTERVAL
+from src.services.alert_manager import AlertManager
 
 class LogAnalyzer:
     """Background service to detect critical anomalies in system logs."""
@@ -16,6 +17,10 @@ class LogAnalyzer:
     def analyze_new_logs(self):
         """Reads new log entries and checks for critical phrases."""
         try:
+            # Create file if it doesn't exist to prevent crash
+            if not os.path.exists(self.log_file):
+                with open(self.log_file, 'w') as f: f.write("")
+                
             with open(self.log_file, 'r') as f:
                 f.seek(self.last_read_position)
                 new_logs = f.readlines()
@@ -29,8 +34,6 @@ class LogAnalyzer:
                     elif "RESOURCE SEIZURE" in line or "PRIVILEGE ESCALATION" in line:
                          self.alert_manager.send_alert("CRITICAL_SECURITY", "Privilege Escalation Detected!", line)
                          
-        except FileNotFoundError:
-            logging.error(f"Log file {self.log_file} not found.")
         except Exception as e:
             logging.error(f"Error during log analysis: {e}")
 
@@ -39,4 +42,4 @@ class LogAnalyzer:
         logging.info("Starting Log Analyzer loop.")
         while True:
             self.analyze_new_logs()
-            time.sleep(SCHEDULER_LOOP_INTERVAL * 2) # Check less frequently
+            time.sleep(SCHEDULER_LOOP_INTERVAL)
