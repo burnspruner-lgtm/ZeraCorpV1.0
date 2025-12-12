@@ -1,4 +1,4 @@
-# scheduler_gateway.py (Renamed to main.py)
+# main.py
 
 import logging
 import threading
@@ -7,8 +7,23 @@ import sys
 import functools
 import time
 import random
-from typing import Dict, Any, Final, Optional, List
-from flask import Flask, jsonify, request, session
+import subprocess
+import importlib
+import hashlib
+import uuid
+import json
+import sqlite3
+import shutil
+import getpass
+import socket
+import platform
+import traceback
+import warnings
+import inspect
+import gc
+from typing import Dict, Any, List, Optional, Final, Tuple, Union, Callable, Iterable, Generator, Set, FrozenSet
+from datetime import datetime, timedelta
+from flask import Flask, jsonify, request, session, abort, make_response, send_from_directory, redirect, url_for
 from flask_cors import CORS
 from flask_session import Session
 import psutil 
@@ -21,19 +36,18 @@ except ImportError:
     print("📦 Missing dependency 'psutil' detected. Installing...")
     try:
         subprocess.check_call([sys.executable, "-m", "pip", "install", "psutil", "requirements.txt"])
-        importlib.invalidate_caches() # --- Force Python to see new package ---
+        importlib.invalidate_caches()
         import psutil
         print("✅ 'psutil' installed successfully.")
     except Exception as e:
         print(f"⚠️ Failed to install 'psutil': {e}")
         print("   System will attempt to run in Simulation Mode.")
-        psutil = None # Allow app to continue without it
+        psutil = None
 
-# --- ROBUST PATH SETUP (Added to fix your import errors) ---
-# This ensures we find the project root regardless of where you run python from
+# --- PATH SETUP
 current_file_path = os.path.abspath(__file__)
-current_dir = os.path.dirname(current_file_path) # src/
-project_root = os.path.dirname(current_dir)      # ZeraCorpV1.0/
+current_dir = os.path.dirname(current_file_path)
+project_root = os.path.dirname(current_dir)
 
 # Add project root to sys.path if missing
 if project_root not in sys.path:
@@ -43,12 +57,7 @@ if project_root not in sys.path:
 os.chdir(project_root)
 print(f"🔧 System Root set to: {project_root}")
 
-# --- ENVIRONMENT PATCH (Kept from your code) ---
-# Force define these to prevent NameErrors in fragile modules
-if "DATABASE_URL" not in os.environ:
-    os.environ["IS_PRODUCTION"] = "False"
-
-# --- IMPORTS (Now reliable due to path fix) ---
+# --- IMPORTS ---
 try:
     from src.core.ai_agent import start_ai_agent_thread, ai_agent_status, ai_agent_status_lock
     from src.ai.heuristic_engine import HeuristicEngine
@@ -57,19 +66,20 @@ try:
     from src.core.schema_definitions import is_valid_schema
     from src.core.utils import load_json_file
     from src.core.logger_utility import LoggerUtility
-
     from src.services.monitoring_service import MonitoringService
     from src.services.db_connector import DBConnector
     from src.services.external_api_client import ExternalAPIClient
     from src.services.cost_management import CostManager
     from src.services.alert_manager import AlertManager
     from src.services.log_analyzer import LogAnalyzer
-
     from src.ai.ai_chat_parser import parse_ai_query, update_last_decision
     from src.ml.ml_model import MachineLearningModel
+    from src.services.alert_manager import AlertManager
+    from src.services.log_analyzer import LogAnalyzer
+    from src.services.monitoring_service import MonitoringService
 except ImportError as e:
     print(f"❌ CRITICAL IMPORT ERROR: {e}")
-    print("   Ensure you have run 'python init_packages.py' to create __init__.py files.")
+    print("   Ensure you have run 'finalize _strucuture.py' to check files.")
     sys.exit(1)
 
 # --- SECTION 1: SYSTEM SETUP AND CONFIGURATION ---
@@ -78,7 +88,7 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY', 'zeracorp-super-secret-key-v1')
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, origins=["*"])
 
 class DataIngestionHandler:
     def __init__(self, config, model):
@@ -139,6 +149,10 @@ def login_required(f):
 # Global Components
 components = {}
 
+def IS_PRODUCTION():
+    if "DATABASE_URL" not in os.environ:
+        os.environ["IS_PRODUCTION"] = "False"
+            
 def init_system():
     """Initializes all ZeraCorp subsystems in the correct order."""
     logging.info("--- BOOT SEQUENCE: ZeraCorp V1.0 ---")
@@ -163,7 +177,7 @@ def init_system():
     
     # 5. Database Init
     initialize_database()
-    create_admin_account()
+    create_first_admin()
         
     # 6. Data Handler Init (Uses components)
     components['data_handler'] = DataIngestionHandler(components['config'], components['ml_model'])
@@ -175,36 +189,6 @@ def init_system():
     components['scheduler'] = AnalyticsScheduler(components['config'])
     
     logging.info("--- BOOT SEQUENCE COMPLETE ---")
-
-def initialize_database():
-    """Ensures tables exist."""
-    user_sql = """
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password_hash TEXT NOT NULL,
-        role TEXT NOT NULL DEFAULT 'user'
-    );"""
-    
-    sensor_sql = """
-    CREATE TABLE IF NOT EXISTS sensor_data (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        field_id TEXT, moisture INTEGER, temp INTEGER, 
-        nutrient_level TEXT, cost_kes INTEGER, 
-        pump_pressure INTEGER, wind_speed INTEGER, 
-        solar_radiation INTEGER, ai_action TEXT, 
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-    );"""
-    # Note: DBConnector handles the execution
-    DBConnector.execute_commit(user_sql)
-    DBConnector.execute_commit(sensor_sql)
-    logging.info("Database initialized with 'users' and 'sensor_data' tables.")
-
-def create_admin_account():
-    if not DBConnector.execute_query("SELECT * FROM users WHERE role='admin'", one=True):
-        pw_hash = generate_password_hash("admin123")
-        DBConnector.execute_commit("INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)", ("admin", pw_hash, "admin"))
-        logging.warning("BOOTSTRAP: Created default admin account (admin/admin123)")
 
 def start_threads():
     """Starts background autonomous agents."""
@@ -361,7 +345,9 @@ def initialize_database():
         pump_pressure INTEGER, ai_action TEXT, wind_speed INTEGER, solar_radiation INTEGER
     );"""
 
-    if not IS_PRODUCTION:
+    # --- ENVIRONMENT PATCH (Kept from your code) ---
+    # Force define these to prevent NameErrors in fragile modules
+    if not IS_PRODUCTION():
         # --- Local SQLite Schema ---
         user_table_sql = user_table_sql.replace("SERIAL PRIMARY KEY", "INTEGER PRIMARY KEY AUTOINCREMENT")
         sensor_table_sql = sensor_table_sql.replace("SERIAL PRIMARY KEY", "INTEGER PRIMARY KEY AUTOINCREMENT")

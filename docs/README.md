@@ -66,11 +66,14 @@ To run this "fully fledged" system on your local machine:
     git clone [https://github.com/burnspruner-lgtm/ZeraCorpV1.0.git](https://github.com/burnspruner-lgtm/ZeraCorpV1.0.git)
     cd ZeraCorpV1.o
     ```
+    ```bash # --Alternative--#
+    cd "C:\Users\Braeb\Documents\BURNSPRUNER\Project\ZeraCorpV1.0"
+    ```
 2.  **Create a Virtual Environment** (Recommended):
     ```bash
     python -m venv venv
     set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
+    .venv/bin/activate.ps1  # On Windows
     ```
 3.  **Install All "World-Class" Requirements:**
     ```bash
@@ -84,17 +87,17 @@ To run this "fully fledged" system on your local machine:
 5.  **Run the "Fully Fledged" Server:**
     This will start the local server. It will also create your `local_farm_data.db` and your default `agri_admin` account.
     ```bash
-    python main.py
+    python run_system.py
     ```
 6.  **Log In:**
     * Open `dashboard.html` in your browser.
     * Log in with the "First Admin" account:
-    * **Username:** `agri_admin`
-    * **Password:** `password123`
+    * **Username:** `burns_pruner`
+    * **Password:** `burns001`
 
 ---
 
-## 🌎 "Compete World-Wide" Deployment (Render.com)
+## 🌎 "Compete World-Wide" Deployment (Render.com) # -- Not Approved--#
 
 This system is built to go online.
 

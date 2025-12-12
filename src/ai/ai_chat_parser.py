@@ -5,7 +5,7 @@ from typing import Dict, Any
 # --- NEW: We must import the AI classes to query them ---
 # (Adjust these imports if your file structure is different)
 try:
-    from src.ai.ai_agent import AIActionDecider, ai_agent_status
+    from src.core.ai_agent import AIActionDecider, ai_agent_status
     from src.ai.heuristic_engine import HeuristicEngine
 except ImportError:
     logging.critical("Chat Parser: Could not import AI components!")
