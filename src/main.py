@@ -21,6 +21,8 @@ import traceback
 import warnings
 import inspect
 import gc
+import json
+import sqlite3
 from typing import Dict, Any, List, Optional, Final, Tuple, Union, Callable, Iterable, Generator, Set, FrozenSet
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, request, session, abort, make_response, send_from_directory, redirect, url_for
@@ -48,6 +50,9 @@ except ImportError:
 current_file_path = os.path.abspath(__file__)
 current_dir = os.path.dirname(current_file_path)
 project_root = os.path.dirname(current_dir)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = os.path.join(current_dir, 'web', 'templates')
+STATIC_DIR = os.path.join(current_dir, 'web', 'static')
 
 # Add project root to sys.path if missing
 if project_root not in sys.path:
@@ -84,7 +89,9 @@ except ImportError as e:
 
 # --- SECTION 1: SYSTEM SETUP AND CONFIGURATION ---
 LoggerUtility.setup_logging()
-app = Flask(__name__)
+app = Flask(__name__,
+        template_folder=TEMPLATE_DIR, 
+        static_folder=STATIC_DIR)
 app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY', 'zeracorp-super-secret-key-v1')
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
@@ -252,6 +259,34 @@ def status():
         "safety_lock": safety_lock,
         "agent_deep_status": deep_status
     })
+
+@app.route('/')
+def index():
+    """Serves the main gateway page (index.html)."""
+    return render_template('index.html')
+
+@app.route('/dashboard')
+def dashboard():
+    """
+    Serves the main application dashboard (dashboard.html).
+    The session/login check is commented out for now, as requested.
+    """
+    if not session.get('logged_in'):
+        return redirect(url_for('index'))
+    return render_template('dashboard.html')
+
+@app.route('/docs')
+def documentation():
+    # Adjust path relative to main.py's location
+    docs_path = os.path.join(os.path.dirname(__file__), '..', 'docs', 'README.md') 
+    with open(docs_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    # Convert Markdown to HTML
+    html_content = markdown.markdown(content)
+
+    # You would typically wrap this in a full HTML template
+    return render_template_string(f"<!DOCTYPE html><html><body>{html_content}</body></html>")
 
 @app.route("/api/process_full_ai", methods=['POST'])
 def process_data():

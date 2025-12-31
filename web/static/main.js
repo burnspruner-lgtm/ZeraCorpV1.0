@@ -84,6 +84,20 @@ async function handleDataSubmission(e) {
 }
 
 // Event Listeners
-dataForm.addEventListener('submit', handleDataSubmission);
-setInterval(fetchHeartbeat, 3000); // Fetch heartbeat every 3 seconds
-fetchHeartbeat(); // Initial fetch
+document.addEventListener('DOMContentLoaded', () => {
+    // ensuring robustness
+    const dataForm = document.getElementById('data-form');
+    if (dataForm) {
+        dataForm.addEventListener('submit', handleDataSubmission);
+    }
+    
+    // Check heartbeat immediately and then every 3 seconds
+    if (typeof startAppServices === 'function') {
+        startAppServices(); // Assuming this is defined elsewhere or in the HTML
+    } else {
+         // Fallback if startAppServices isn't available (e.g., during testing)
+        setInterval(fetchHeartbeat, 3000);
+        fetchHeartbeat();
+        log('ZeraCorp V1.0 - Front-end loaded.', 'INFO');
+    }
+});

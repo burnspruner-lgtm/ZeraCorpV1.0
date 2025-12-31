@@ -51,6 +51,10 @@ FILE_MAPPING = {
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
+def get_python_executable():
+    """Returns the path to the currently active Python executable."""
+    return sys.executable
+
 def organize_files():
     print("🔧 DIAGNOSTIC: Checking file structure...")
     

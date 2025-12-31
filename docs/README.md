@@ -71,7 +71,7 @@ To run this "fully fledged" system on your local machine:
     ```
 2.  **Create a Virtual Environment** (Recommended):
     ```bash
-    python -m venv venv
+    python -m venv .venv
     set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
     .venv/bin/activate.ps1  # On Windows
     ```
