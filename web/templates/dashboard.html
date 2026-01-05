@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Signup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <!-- ========================================== -->
+    <!-- SECTION 1: ZeraCorp Landing Page -->
+    <!-- ========================================== -->
+    <div id="landing-page" class="fixed inset-0 z-[60] bg-slate-900 overflow-y-auto w-full h-full">
+        <!-- Nav -->
+        <nav class="fixed w-full z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-20">
+                    <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer">
+                        <div class="w-8 h-8 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <span class="font-bold text-white text-xl">Z</span>
+                        </div>
+                        <span class="font-bold text-xl tracking-tight text-white">ZeraCorp V1.0</span>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-8">
+                            <a href="#features" class="text-slate-300 hover:text-blue-400 transition-colors duration-200 font-medium text-sm">Solutions</a>
+                            <a href="#about" class="text-slate-300 hover:text-blue-400 transition-colors duration-200 font-medium text-sm">Platform</a>
+                            <button onclick="transitionToAuth()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-medium transition-all duration-200 transform hover:scale-105 shadow-lg shadow-blue-500/25">
+                                Client Login
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero -->
+        <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+            <div class="landing-hero-bg absolute top-0 left-0 w-full h-full pointer-events-none"></div>
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/50 border border-slate-700 mb-8">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-sm font-medium text-slate-300">Heuristic Engine Online</span>
+                </div>
+                
+                <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 text-white">
+                    Future-Proof Your <br />
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-white">Digital Infrastructure</span>
+                </h1>
+                
+                <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-400 mb-10">
+                    ZeraCorp V1.0 combines advanced Machine Learning with a rational Heuristic Engine to autonomously manage agricultural assets.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <button onclick="transitionToAuth()" class="group bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-bold text-lg transition-all duration-200 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2">
+                        Initialize System
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                    <a href="https://github.com/burnspruner-lgtm/ZeraCorpV1.0" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-lg font-bold text-lg transition-all duration-200 border border-slate-700 flex items-center justify-center gap-2">
+                        View Documentation
+                        <i class="fa-brands fa-github text-slate-400"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="features" class="py-20 bg-slate-800/30 border-t border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Feature 1 -->
+                    <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl hover:border-blue-500/50 transition-colors group">
+                        <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-globe text-blue-400 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Global Connectivity</h3>
+                        <p class="text-slate-400 leading-relaxed">Seamless synchronization via DBConnector with support for local SQLite and cloud PostgreSQL.</p>
+                    </div>
+                    <!-- Feature 2 -->
+                    <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl hover:border-blue-500/50 transition-colors group">
+                        <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-shield-halved text-emerald-400 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Enterprise Security</h3>
+                        <p class="text-slate-400 leading-relaxed">Role-Based Access Control (RBAC) with secure session handling and password hashing.</p>
+                    </div>
+                    <!-- Feature 3 -->
+                    <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl hover:border-blue-500/50 transition-colors group">
+                        <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-bolt text-purple-400 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Heuristic Processing</h3>
+                        <p class="text-slate-400 leading-relaxed">AI that learns from feedback using a dynamic heuristic engine to optimize decision confidence.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 border-t border-slate-800 pt-16 pb-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-500 text-sm">
+                <p>&copy; 2025 ZeraCorp Inc. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 2: Auth Logic -->
+    <!-- ========================================== -->
+    <div id="auth-page" class="auth-container hidden w-screen h-screen">
+        <div class="auth-card fade-in">
+            <div class="flex justify-center mb-6">
+                <div class="w-12 h-12 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <span class="font-bold text-white text-2xl">Z</span>
+                </div>
+            </div>
+            <h1 class="text-2xl font-bold text-center mb-2 text-white">System Access</h1>
+            <p class="text-slate-400 text-center mb-8 text-sm">Enter credentials to access the ZeraCorp Mainframe.</p>
+            
+            <div class="flex border-b border-slate-700 mb-6">
+                <button id="tab-login" class="auth-tab active flex-1">Login</button>
+                <button id="tab-register" class="auth-tab flex-1">Register</button>
+            </div>
+            
+            <div id="login-form-container">
+                <form id="login-form">
+                    <div class="mb-4">
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">USERNAME</label>
+                        <input id="login-username" type="text" class="w-full p-3 rounded" required>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">PASSWORD</label>
+                        <input id="login-password" type="password" class="w-full p-3 rounded" required>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-500 transition-colors shadow-lg shadow-blue-500/30">
+                        Authenticate
+                    </button>
+                    <div id="login-error" class="text-red-500 mt-4 text-center text-sm min-h-[20px]"></div>
+                </form>
+            </div>
+            
+            <div id="register-form-container" class="hidden">
+                <form id="register-form">
+                    <div class="mb-4">
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">NEW USERNAME</label>
+                        <input id="register-username" type="text" class="w-full p-3 rounded" required>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">SET PASSWORD</label>
+                        <input id="register-password" type="password" class="w-full p-3 rounded" required>
+                    </div>
+                    <button type="submit" class="w-full bg-slate-700 text-white p-3 rounded-lg font-semibold hover:bg-slate-600 transition-colors">
+                        Create Username
+                    </button>
+                    <div id="register-message" class="mt-4 text-center text-sm min-h-[20px]"></div>
+                </form>
+            </div>
+            
+            <div class="mt-6 text-center">
+                <button onclick="backToLanding()" class="text-slate-500 hover:text-slate-300 text-xs underline">Back to Home</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 3: App Shell -->
+    <!-- ========================================== -->
+    <div id="app-shell" class="hidden h-screen w-screen flex overflow-hidden bg-slate-900">
+        <!-- Sidebar -->
+        <nav class="w-64 bg-slate-900 border-r border-slate-800 text-white flex-shrink-0 p-4 flex flex-col z-20">
+            <div class="flex items-center gap-2 mb-8 px-2">
+                <div class="w-6 h-6 bg-gradient-to-tr from-blue-500 to-purple-600 rounded flex items-center justify-center">
+                    <span class="font-bold text-white text-xs">Z</span>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight">ZeraCorp</h1>
+            </div>
+            
+            <div id="sidebar-nav" class="space-y-1 flex-grow"></div>
+            
+            <div class="border-t border-slate-800 pt-4 mt-4">
+                <div id="user-profile" class="text-slate-400 px-2 mb-4">
+                    <p class="text-xs uppercase tracking-wider text-slate-500 mb-1">Logged in as<user.id><user.username></p>
+                    <p class="font-semibold text-white" id="user-name">Not Logged In</p>
+                    <p class="text-xs text-blue-400" id="user-role"><user.role><user.username></p>
+                </div>
+                <button id="logout-button" class="w-full text-left nav-link text-red-400 hover:bg-red-500/10 hover:text-red-400">
+                    <i class="fa-solid fa-power-off"></i>Log Out
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col h-screen relative bg-slate-900 overflow-hidden">
+            <!-- Header -->
+            <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center z-10">
+                <h2 id="page-title" class="text-xl font-bold text-white">Dashboard</h2>
+                
+                <div class="flex items-center space-x-6">
+                    <div class="hidden md:block text-right">
+                        <div><span class="stat-title text-xs">UPLINK</span> <span id="heartbeat" class="text-xs font-mono text-emerald-500 ml-2">ESTABLISHED</span></div>
+                        <div data-role="developer" data-role-admin><span class="stat-title text-xs">LOCK</span> <span id="safety-lock-status" class="text-xs font-mono text-slate-500 ml-2">N/A</span></div>
+                    </div>
+                    <button id="btn-trigger-ai" data-role="admin" data-role-user class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-transform active:scale-95">
+                        <i class="fa-solid fa-microchip"></i>
+                        <span>AI Inference</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Page Area -->
+            <div class="flex-1 p-6 overflow-y-auto custom-scrollbar relative">
+                
+                <!-- Dashboard -->
+                <div id="page-dashboard" class="page active">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="stat-card card">
+                            <span class="stat-title"><i class="fa-solid fa-heart-pulse mr-2 text-pink-500"></i>Agent Health</span>
+                            <div id="agent-health" class="stat-value text-emerald-400">Stable</div>
+                        </div>
+                        <div class="stat-card card">
+                            <span class="stat-title"><i class="fa-solid fa-clock mr-2 text-blue-500"></i>Uptime</span>
+                            <div id="agent-uptime" class="stat-value">0.0s</div>
+                        </div>
+                        <div class="stat-card card">
+                            <span class="stat-title"><i class="fa-solid fa-brain mr-2 text-purple-500"></i>Decisions</span>
+                            <div id="total-decisions" class="stat-value">0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-6 border-t-4 border-t-blue-500">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-white">Telemetry Input</h3>
+                            <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded">Live Feed (Strict Schema)</span>
+                        </div>
+                        <form id="data-form">
+                            <div  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <label class="block text-xs text-slate-400 mb-1">FIELD ID</label>
+                                <input type="text" id="field-id" value="Maize-Field-01" class="w-full p-2 rounded text-sm bg-slate-800 border border-slate-600 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">NUTRIENT LEVEL</label>
+                                <select name="nutrient_level" class="w-full p-2 rounded text-sm bg-slate-800 border border-slate-600 text-white">
+                                    <option>OPTIMAL</option>
+                                    <option>LOW</option>
+                                    <option>HIGH</option>
+                                    <option>N/A</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">HISTORICAL TREND</label>
+                                <select name="historical_trend" class="w-full p-2 rounded text-sm bg-slate-800 border border-slate-600 text-white">
+                                    <option>NORMAL</option>
+                                    <option>HIGH_INTERVENTION</option>
+                                    <option>UNKNOWN</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">COST (KES)</label>
+                                <input type="number" name="cost_kes" value="1000" class="w-full p-2 rounded text-sm bg-slate-800 border border-slate-600 text-white">
+                            </div>
+                            <div class="col-span-1 sm:col-span-2">
+                                <label class="block text-xs text-slate-400 mb-1 flex justify-between">
+                                    <span>MOISTURE</span> <span class="text-blue-400" id="val-moisture-disp">65%</span>
+                                </label>
+                                <input type="range" name="moisture" min="0" max="100" value="65" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="document.getElementById('val-moisture-disp').textContent = this.value + '%'">
+                            </div>
+                            <div class="col-span-1 sm:col-span-2">
+                                <label class="block text-xs text-slate-400 mb-1 flex justify-between">
+                                    <span>TEMP</span> <span class="text-red-400" id="val-temp-disp">25°C</span>
+                                </label>
+                                <input type="range" name="temp" min="0" max="50" value="25" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="document.getElementById('val-temp-disp').textContent = this.value + '°C'">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">PRESSURE (PSI)</label>
+                                <input type="number" name="pump_pressure" value="70" class="w-full p-2 rounded text-sm bg-slate-800 border border-slate-600 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">WIND (KPH)</label>
+                                <input type="number" name="wind_speed" value="15" class="w-full p-2 rounded text-sm bg-slate-800 border border-slate-600 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">RADIATION (W/m²)</label>
+                                <input type="number" name="solar_radiation" value="850" class="w-full p-2 rounded text-sm bg-slate-800 border border-slate-600 text-white">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-400">WIND SPEED (km/h)</label>
+                                <input type="number" name="wind_speed" value="0" class="w-full rounded-lg">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-400">SOLAR RAD (W/m²)</label>
+                                <input type="number" name="solar_radiation" value="0" class="w-full rounded-lg">
+                            </div>
+                            <button type="submit" class="w-full bg-slate-700 text-white p-3 rounded-lg font-semibold hover:bg-slate-600 transition-colors">
+                                Submit
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Chat Page -->
+                <div id="page-ai_chat" class="page" data-role="user" data-role-admin>
+                    <div class="card p-6 h-[80vh] flex flex-col">
+                        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-robot text-blue-500"></i> GURU Interface
+                        </h3>
+                        <div id="chat-window" class="flex-grow border border-slate-700 rounded-lg p-4 overflow-y-auto bg-slate-950 mb-4 space-y-3">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-robot text-white text-xs"></i>
+                                </div>
+                                <div class="bg-slate-800 p-3 rounded-r-lg rounded-bl-lg text-sm text-slate-300">
+                                    Systems online. Ask me about heuristics, confidence levels, or rule R001.
+                                </div>
+                            </div>
+                        </div>
+                        <form id="chat-form" class="flex gap-2">
+                            <input id="chat-input" type="text" class="flex-grow p-3 rounded-lg bg-slate-950 border border-slate-700 text-white placeholder-slate-600 focus:border-blue-500" placeholder="Execute query...">
+                            <button type="submit" class="bg-blue-600 text-white px-6 rounded-lg font-semibold hover:bg-blue-700">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Other Pages (Styled as Cards) -->
+                <div id="page-soil_analysis" class="page card p-6" data-role="user" data-role-admin>
+                    <h2 class="text-xl font-semibold mb-4 text-emerald-400">Soils & Crops</h2>
+                    <div id="content-soil" class="text-slate-400">Waiting for data stream...</div>
+                </div>
+                
+                <div id="page-location_intel" class="page card p-6" data-role="user" data-role-admin>
+                    <h2 class="text-xl font-semibold mb-4 text-blue-400">Geospatial Intel</h2>
+                    <div id="content-location" class="text-slate-400">Waiting for GPS fix...</div>
+                </div>
+                
+                <div id="page-ml_insights" class="page card p-6" data-role="admin">
+                    <h2 class="text-xl font-semibold mb-4 text-purple-400">ML Predictions</h2>
+                    <div id="content-insights" class="text-slate-400">Calculating...</div>
+                </div>
+                
+                <div id="page-ai_heuristics" class="page card p-6" data-role="maintenance" data-role-admin>
+                    <h2 class="text-xl font-semibold mb-4 text-yellow-400">Heuristic Logic</h2>
+                    <pre id="content-heuristics" class="bg-slate-950 p-4 rounded text-xs font-mono text-green-500 overflow-x-auto">Loading AI memory banks...</pre>
+                </div>
+                
+                <div id="page-admin_panel" class="page card p-6" data-role="admin">
+                    <h2 class="text-xl font-semibold mb-4 text-red-400">User Governance</h2>
+                    <div id="user-management-table" class="overflow-x-auto text-sm">Fetching user directory...</div>
+                </div>
+                
+                <div id="page-system_logs" class="page card p-6 h-[80vh] flex flex-col" data-role="developer" data-role-maintenance data-role-admin>
+                    <h2 class="text-xl font-semibold mb-4 text-slate-400">System Logs</h2>
+                    <div id="logs" class="flex-grow bg-black text-green-500 p-4 rounded-lg overflow-y-auto font-mono text-xs border border-slate-800"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal (Styled) -->
+    <div id="modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl w-11/12 max-w-2xl overflow-hidden transform transition-all scale-100">
+            <div class="bg-slate-900 px-6 py-4 border-b border-slate-700 flex justify-between items-center">
+                <h3 id="modal-title" class="text-lg font-bold text-white">System Message</h3>
+                <button id="modal-close" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="modal-body" class="p-6 max-h-[70vh] overflow-y-auto text-slate-300 space-y-4"></div>
+        </div>
+    </div>
+<script>
+    
+    // --- CONNECTING TO YOUR REAL BACKEND ---
+    const API_URL = "{{ url_for('index', _external=True) }}".replace(/\/$/, '');
+
+    let userRole = null;
+    
+    // --- 1. Element References ---
+    const elements = {
+        landingPage: document.getElementById('landing-page'), // NEW
+        authPage: document.getElementById('auth-page'),
+        appShell: document.getElementById('app-shell'),
+        logs: document.getElementById('logs'),
+        heartbeat: document.getElementById('heartbeat'),
+        safetyLock: document.getElementById('safety-lock-status'),
+        agentHealth: document.getElementById('agent-health'),
+        agentUptime: document.getElementById('agent-uptime'),
+        totalDecisions: document.getElementById('total-decisions'),
+        dataForm: document.getElementById('data-form'),
+        modal: document.getElementById('modal'),
+        modalTitle: document.getElementById('modal-title'),
+        modalBody: document.getElementById('modal-body'),
+        modalClose: document.getElementById('modal-close'),
+        pageTitle: document.getElementById('page-title'),
+        sidebarNav: document.getElementById('sidebar-nav'),
+        userName: document.getElementById('user-name'),
+        userRole: document.getElementById('user-role'),
+        chat: { window: document.getElementById('chat-window'), form: document.getElementById('chat-form'), input: document.getElementById('chat-input') },
+        pageContents: {
+            soil_analysis: document.getElementById('content-soil'),
+            location_intel: document.getElementById('content-location'),
+            ml_insights: document.getElementById('content-insights'),
+            ai_heuristics: document.getElementById('content-heuristics'),
+            admin_panel: document.getElementById('user-management-table')
+        },
+        loginForm: document.getElementById('login-form'),
+        loginError: document.getElementById('login-error'),
+        loginUsername: document.getElementById('login-username'),
+        loginPassword: document.getElementById('login-password'),
+        registerForm: document.getElementById('register-form'),
+        registerMessage: document.getElementById('register-message'),
+        registerUsername: document.getElementById('register-username'),
+        registerPassword: document.getElementById('register-password'),
+        tabLogin: document.getElementById('tab-login'),
+        tabRegister: document.getElementById('tab-register'),
+        loginFormContainer: document.getElementById('login-form-container'),
+        registerFormContainer: document.getElementById('register-form-container'),
+        logoutButton: document.getElementById('logout-button')
+    };
+    const pages = document.querySelectorAll('.page');
+    
+    // --- 2. Navigation Control  ---
+    
+    function showLanding() {
+        elements.appShell.classList.add('hidden');
+        elements.authPage.classList.add('hidden');
+        elements.landingPage.classList.remove('hidden');
+    }
+
+    function initializeDashboardView() {
+    // Hide the landing page and auth page
+    document.getElementById('landing-page').style.display = 'none';
+    document.getElementById('auth-page').style.display = 'none';
+    
+    // Show the main application shell
+    document.getElementById('app-shell').classList.remove('hidden');
+    
+    // Trigger the overview page
+    showPage('overview'); 
+}
+
+    // Run this when the window finishes loading
+    window.onload = initializeDashboardView;
+
+    // Exposed to global scope for HTML onclick attributes
+    window.transitionToAuth = function() {
+        elements.landingPage.classList.add('hidden');
+        elements.authPage.classList.remove('hidden');
+        elements.authPage.classList.add('flex'); // Ensure flex is restored
+    }
+
+    window.backToLanding = function() {
+        elements.authPage.classList.add('hidden');
+        elements.authPage.classList.remove('flex');
+        elements.landingPage.classList.remove('hidden');
+    }
+
+    // --- 3. Role-Based Navigation & UI ---
+    const navConfig = {
+        dashboard: '<a href="#dashboard" class="nav-link"><i class="fa-solid fa-chart-line"></i>Dashboard</a>',
+        ai_chat: '<a href="#ai_chat" class="nav-link"><i class="fa-solid fa-comments"></i>AI Assistant</a>',
+        soil_analysis: '<a href="#soil_analysis" class="nav-link"><i class="fa-solid fa-seedling"></i>Soil & Crop</a>',
+        location_intel: '<a href="#location_intel" class="nav-link"><i class="fa-solid fa-map-location-dot"></i>Location Intel</a>',
+        ml_insights: '<a href="#ml_insights" class="nav-link"><i class="fa-solid fa-brain"></i>ML Predictions</a>',
+        ai_heuristics: '<a href="#ai_heuristics" class="nav-link"><i class="fa-solid fa-diagram-project"></i>Heuristics</a>',
+        admin_panel: '<a href="#admin_panel" class="nav-link"><i class="fa-solid fa-users-gear"></i>Admin</a>',
+        system_logs: '<a href="#system_logs" class="nav-link"><i class="fa-solid fa-terminal"></i>Logs</a>'
+    };
+    const rolePermissions = {
+        user: ['dashboard', 'ai_chat', 'soil_analysis', 'location_intel'],
+        admin: ['dashboard', 'admin_panel', 'ai_chat', 'soil_analysis', 'location_intel', 'ml_insights', 'ai_heuristics', 'system_logs'],
+        maintenance: ['dashboard', 'ai_heuristics', 'system_logs'],
+        developer: ['dashboard', 'admin_panel', 'ai_chat', 'soil_analysis', 'location_intel', 'ml_insights', 'ai_heuristics', 'system_logs']
+    };
+    function applyRoles(role) {
+        elements.sidebarNav.innerHTML = '';
+        rolePermissions[role].forEach(pageId => {
+            elements.sidebarNav.innerHTML += navConfig[pageId];
+        });
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => { e.preventDefault(); showPage(e.currentTarget.hash.substring(1)); });
+        });
+        
+        const userAccess = rolePermissions[role];
+        document.querySelectorAll('[data-role]').forEach(el => {
+            const roles = Object.keys(el.dataset);
+            const hasAccess = roles.some(r => userAccess.includes(el.dataset[r]));
+
+            if (hasAccess) {
+                 if(!el.classList.contains('page')) el.style.display = 'block';
+            } else {
+                 if(!el.classList.contains('page')) el.style.display = 'none';
+            }
+        });
+        
+        showPage('dashboard');
+    }
+
+    // --- 4. Auth Page Logic ---
+    
+    // Tab switching
+    elements.tabLogin.addEventListener('click', () => {
+        elements.tabLogin.classList.add('active');
+        elements.tabRegister.classList.remove('active');
+        elements.loginFormContainer.classList.remove('hidden');
+        elements.registerFormContainer.classList.add('hidden');
+    });
+    elements.tabRegister.addEventListener('click', () => {
+        elements.tabRegister.classList.add('active');
+        elements.tabLogin.classList.remove('active');
+        elements.registerFormContainer.classList.remove('hidden');
+        elements.loginFormContainer.classList.add('hidden');
+    });
+    
+    // Handle Registration 
+    elements.registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = elements.registerUsername.value;
+        const password = elements.registerPassword.value;
+        elements.registerMessage.textContent = "Processing registration...";
+        elements.registerMessage.className = "mt-4 text-center text-slate-400";
+        try {
+            const response = await fetch(`${API_URL}/api/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ username, password })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+            elements.registerMessage.textContent = data.message;
+            elements.registerMessage.className = "mt-4 text-center text-emerald-500";
+            setTimeout(() => elements.tabLogin.click(), 1500);
+        } catch (error) {
+            elements.registerMessage.textContent = `Error: ${error.message}`;
+            elements.registerMessage.className = "mt-4 text-center text-red-500";
+        }
+    });
+    
+    // Handle Login 
+    elements.loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = elements.loginUsername.value;
+        const password = elements.loginPassword.value;
+        elements.loginError.textContent = "Authenticating...";
+        elements.loginError.className = "mt-4 text-center text-blue-400 animate-pulse";
+        try {
+            const response = await fetch(`${API_URL}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ username, password })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+            startFullApp(data.username, data.role);
+        } catch (error) {
+            elements.loginError.className = "mt-4 text-center text-red-500";
+            elements.loginError.textContent = `Access Denied: ${error.message}`;
+        }
+    });
+
+    // Handle Logout
+    elements.logoutButton.addEventListener('click', async () => {
+        await fetch(`${API_URL}/api/logout`, { method: 'POST', credentials: 'include' }); 
+        window.location.reload();
+    });
+
+    // --- 5. Main App Initialization ---
+    
+    function startFullApp(username, role) {
+        userRole = role;
+        elements.userName.textContent = username;
+        elements.userRole.textContent = role.toUpperCase();
+        
+        elements.landingPage.classList.add('hidden');
+        elements.authPage.classList.add('hidden');
+        elements.authPage.classList.remove('flex');
+        elements.appShell.classList.remove('hidden');
+        
+        applyRoles(userRole);
+        startAppServices();
+    }
+    
+    // On page load, check for an existing session 
+    async function checkSession() {
+        try {
+            const response = await fetch(`${API_URL}/api/check_session`, { credentials: 'include' }); 
+            const data = await response.json();
+            if (data.is_logged_in) {
+                startFullApp(data.username, data.role);
+            } else {
+                showLanding();
+            }
+        } catch (e) {
+            console.error("Connection failed", e);
+            showLanding(); 
+        }
+    }
+
+    // --- 6. Logging, Modal, SPA ---
+    function log(message, type = 'INFO') {
+        if(!elements.logs) return;
+        const colors = { 'FATAL': 'text-red-500', 'ERROR': 'text-red-400', 'SUCCESS': 'text-emerald-400', 'REQUEST': 'text-yellow-400', 'INFO': 'text-slate-400' };
+        elements.logs.innerHTML += `<div class="${colors[type] || 'text-slate-400'} font-mono mb-1"><span class="opacity-50">[${new Date().toLocaleTimeString()}]</span> ${message}</div>`;
+        elements.logs.scrollTop = elements.logs.scrollHeight;
+    }
+
+    // Enhanced Modal
+    function showModal(title, jsonData) {
+        elements.modalTitle.textContent = title;
+        const formatted = JSON.stringify(jsonData, null, 2);
+        elements.modalBody.innerHTML = `<pre class="bg-slate-950 p-4 rounded text-xs font-mono text-green-400 overflow-x-auto">${formatted}</pre>`;
+        elements.modal.classList.remove('hidden');
+        elements.modal.classList.add('flex');
+    }
+    
+    elements.modalClose.addEventListener('click', () => {
+        elements.modal.classList.add('hidden');
+        elements.modal.classList.remove('flex');
+    });
+
+    function showPage(pageId) {
+        pages.forEach(p => p.classList.remove('active'));
+        const target = document.getElementById(`page-${pageId}`);
+        if(target) target.classList.add('active');
+        
+        const link = document.querySelector(`a[href="#${pageId}"]`);
+        if(link) {
+            elements.pageTitle.textContent = link.textContent.trim();
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+        } else { elements.pageTitle.textContent = "Dashboard"; }
+        
+        // Auto-run features
+        if (pageId === 'admin_panel') runAdminPanel();
+        if (pageId === 'ml_insights') runFeature('ml_insights', 'api/ml_insights', 'ML Insights', (d) => `<pre class="bg-slate-950 p-4 rounded text-green-400 font-mono text-xs overflow-auto">${JSON.stringify(d,null,2)}</pre>`);
+        if (pageId === 'ai_heuristics') runFeature('ai_heuristics', 'api/heuristics', 'AI Heuristics', (d) => `<pre class="bg-slate-950 p-4 rounded text-green-400 font-mono text-xs overflow-auto">${JSON.stringify(d,null,2)}</pre>`);
+    }
+    
+    // --- 7. API Calls & Data ---
+    function getFormData() {
+        const formData = new FormData(elements.dataForm);
+        const obj = {};
+        formData.forEach((value, key) => obj[key] = value);
+        // Correctly handle integers for strict validation schema
+        obj['moisture'] = parseInt(obj['moisture']);
+        obj['temp'] = parseInt(obj['temp']);
+        obj['pump_pressure'] = parseInt(obj['pump_pressure']);
+        obj['wind_speed'] = parseInt(obj['wind_speed']);
+        obj['solar_radiation'] = parseInt(obj['solar_radiation']);
+        obj['cost_kes'] = parseInt(obj['cost_kes']);
+        obj['field_id'] = document.getElementById('field-id').value;
+        return obj;
+    }
+
+    async function fetchHeartbeat() {
+        try {
+            const response = await fetch(`${API_URL}/status`, { credentials: 'include' }); 
+            const data = await response.json();
+            
+            elements.heartbeat.textContent = "ONLINE";
+            elements.heartbeat.className = 'text-xs font-mono text-emerald-500 ml-2';
+            
+            elements.safetyLock.textContent = data.safety_lock ? 'ENGAGED' : 'BREACH';
+            elements.safetyLock.className = data.safety_lock ? 'text-xs font-mono text-emerald-500 ml-2' : 'text-xs font-mono text-red-500 ml-2 animate-pulse';
+            
+            const status = data.agent_deep_status;
+            elements.agentHealth.textContent = status.agent_health_status || 'OK';
+            elements.agentHealth.className = status.agent_health_status === 'HEALTHY' || status.agent_health_status === 'OK' ? 'stat-value text-emerald-400' : 'stat-value text-red-400';
+            
+            // Handle optional uptime based on monitoring service
+            const uptime = status.uptime_seconds || 0;
+            elements.agentUptime.textContent = `${Number(uptime).toFixed(1)}s`;
+            elements.totalDecisions.textContent = status.total_decisions || 0;
+        } catch (error) { 
+            elements.heartbeat.textContent = 'OFFLINE';
+            elements.heartbeat.className = 'text-xs font-mono text-red-600 ml-2';
+            log(`Heartbeat failed: ${error.message}`, 'FATAL');
+        }
+    }
+    
+    // --- 8. Feature Logic ---
+    document.getElementById('btn-trigger-ai').addEventListener('click', async () => {
+        const payload = getFormData();
+        log(`Triggering Full Heuristic AI for ${payload.field_id}...`, 'REQUEST');
+        
+        const btn = document.getElementById('btn-trigger-ai');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing';
+        
+        try {
+            // Updated Endpoint to match main.py
+            const response = await fetch(`${API_URL}/api/process_full_ai`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                credentials: 'include', 
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+            
+            log(`[SUCCESS] AI Action: ${data.ai_action}`, 'SUCCESS');
+            showModal('AI Decision Matrix', data);
+        } catch (error) { 
+            log(`[ERROR] AI Trigger failed: ${error.message}`, 'ERROR'); 
+            alert("AI Connection Failed: " + error.message);
+        } finally {
+            btn.innerHTML = originalText;
+        }
+    });
+    
+    elements.chat.form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const query = elements.chat.input.value;
+        if (!query) return;
+        addChatMessage(query, 'user');
+        elements.chat.input.value = '';
+        
+        try {
+            const response = await fetch(`${API_URL}/api/ai_chat`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                credentials: 'include', 
+                body: JSON.stringify({ query: query })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.answer);
+            addChatMessage(data.answer, 'ai');
+        } catch (error) { addChatMessage(`Error: ${error.message}`, 'ai'); }
+    });
+
+    function addChatMessage(message, sender) {
+        const div = document.createElement('div');
+        if(sender === 'user') {
+            div.className = "flex items-start gap-3 justify-end";
+            div.innerHTML = `<div class="bg-blue-600 p-3 rounded-l-lg rounded-tr-lg text-sm text-white max-w-[80%]">${message}</div><div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-user text-xs"></i></div>`;
+        } else {
+            div.className = "flex items-start gap-3";
+            div.innerHTML = `<div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-robot text-xs"></i></div><div class="bg-slate-800 p-3 rounded-r-lg rounded-bl-lg text-sm text-slate-300 max-w-[80%]">${message}</div>`;
+        }
+        elements.chat.window.appendChild(div);
+        elements.chat.window.scrollTop = elements.chat.window.scrollHeight;
+    }
+
+    // Helper for other pages
+    async function runFeature(pageId, apiEndpoint, title, buildFunction) {
+        const payload = getFormData();
+        const contentEl = elements.pageContents[pageId];
+        contentEl.innerHTML = '<div class="text-slate-500 animate-pulse"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Processing Neural Request...</div>';
+        
+        try {
+            const response = await fetch(`${API_URL}/${apiEndpoint}`, {
+                method: (apiEndpoint.includes('GET')) ? 'GET' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: (apiEndpoint.includes('GET')) ? null : JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+            contentEl.innerHTML = buildFunction(data);
+        } catch (error) {
+            log(`[ERROR] ${title} failed: ${error.message}`, 'ERROR');
+            contentEl.innerHTML = `<div class="text-red-500 border border-red-900 bg-red-900/20 p-4 rounded">Error: ${error.message}</div>`;
+        }
+    }
+    
+    // --- 9. Admin Panel ---
+    async function runAdminPanel() {
+        try {
+            const response = await fetch(`${API_URL}/api/admin/get_users`, { credentials: 'include' }); 
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+            
+            let html = `<table class="min-w-full divide-y divide-slate-700"><thead class="bg-slate-800"><tr>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">User ID</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Username</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Current Role</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Action</th>
+                        </tr></thead><tbody class="bg-slate-900 divide-y divide-slate-800">`;
+            data.forEach(user => {
+                html += `<tr>
+                            <td class="px-4 py-3 text-slate-500 font-mono">${user.id}</td>
+                            <td class="px-4 py-3 text-white font-semibold">${user.username}</td>
+                            <td class="px-4 py-3"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-900 text-blue-200">${user.role}</span></td>
+                            <td class="px-4 py-3">
+                                <select data-user-id="${user.id}" class="role-select bg-slate-800 border border-slate-600 text-white text-xs rounded p-1 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
+                                    <option value="maintenance" ${user.role === 'maintenance' ? 'selected' : ''}>Maintenance</option>
+                                    <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                                    <option value="developer" ${user.role === 'developer' ? 'selected' : ''}>Developer</option>
+                                </select>
+                            </td></tr>`;
+            });
+            html += `</tbody></table>`;
+            elements.pageContents.admin_panel.innerHTML = html;
+            
+            document.querySelectorAll('.role-select').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    promoteUser(e.target.dataset.userId, e.target.value);
+                });
+            });
+        } catch (error) {
+            elements.pageContents.admin_panel.innerHTML = `<div class="text-red-500">Error: ${error.message}</div>`;
+        }
+    }
+
+    async function promoteUser(user_id, new_role) {
+        try {
+            const response = await fetch(`${API_URL}/api/admin/promote_user`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include', 
+                body: JSON.stringify({ user_id: user_id, new_role: new_role })
+            });
+            if (!response.ok) throw new Error("Failed");
+            log(`[SUCCESS] User ${user_id} promoted to ${new_role}`, 'SUCCESS');
+            runAdminPanel(); // Refresh table
+        } catch (error) { log(`[ERROR] Promote failed`, 'ERROR'); }
+    }
+
+    // --- 10. Start ---
+    function startAppServices() {
+        setInterval(fetchHeartbeat, 3000);
+        fetchHeartbeat();
+        log('ZeraCorp V1.0 System Initialized.', 'SUCCESS');
+    }
+    
+    // Begin
+    checkSession();
+
+    // Automatically detects your current port and IP
+    const API_URL = window.location.origin; 
+
+    // Expert Interaction: Touch Screen Scaling
+    document.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('touchstart', () => btn.style.transform = 'scale(0.95)');
+        btn.addEventListener('touchend', () => btn.style.transform = 'scale(1)');
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+{
+    "model_version": "FarmTech-Agent-V1.0-Enterprise-Security-Edition",
+    "integrity_hash": "a1b2c3d4e5f6-secure",
+    "last_updated": "2025-11-28T23:45:00Z",
+    "context_matrix": {
+        "regions": ["Kenya_Highlands", "Rift_Valley", "Coastal_Strip", "Arid_North"],
+        "crop_types": ["Maize_Hybrid_614", "Tea_Purple_Clone", "Coffee_Arabica", "Wheat_Duma"],
+        "risk_levels": ["NEGLIGIBLE", "MODERATE", "CRITICAL", "CATASTROPHIC"]
+    },
+    
+    "rules_engine_config": {
+        "conflict_resolution": "PRIORITY_SCORE_WEIGHTED",
+        "default_action": "MONITOR_QUIETLY",
+        "throttle_actions": true,
+        "max_actions_per_hour": 5
+    },
+    
+    "system_metadata": {
+        "status": "Production-Ready-Simulation",
+        "last_audit": "2025-11-15",
+        "compliance_standard": "ISO 27001-Simulated-V1.0",
+        "documentation_link": "https://dekut-farmtech.io/docs/v6"
+    },
+    
+    "location_context": {
+        "primary_region": "Kenya_Highlands",
+        "currency": "KES",
+        "primary_crops": ["Tea", "Coffee", "Horticulture", "Pyrethrum"],
+        "weather_pattern": "Equatorial_Highland",
+        "geographical_zones": {
+            "Highlands": {
+                "max_temp_c": 30,
+                "min_moisture_percent": 55,
+                "soil_type": "Volcanic Loam",
+                "risk_profile": "High Altitude Freeze/Hail"
+            },
+            "Coastal": {
+                "max_temp_c": 35,
+                "min_moisture_percent": 45,
+                "soil_type": "Sandy/Coral",
+                "risk_profile": "Drought/High Evaporation"
+            },
+            "Rift_Valley": {
+                "max_temp_c": 32,
+                "min_moisture_percent": 50,
+                "soil_type": "Alluvial",
+                "risk_profile": "Seismic/Heat Stress"
+            }
+        }
+    },
+    
+    "optimal_thresholds": {
+        "moisture_low": 50,
+        "moisture_high": 75,
+        "temp_threshold_critical": 30,
+        "pump_pressure_min_psi": 50,
+        "pump_pressure_max_psi": 95,
+        "cost_limit_kes": 50000,
+        "conflict_critical_action": "ALERT_ENGINEER_PRIVILEGE_LEVEL_3"
+    },
+
+    "ml_model_config": {
+        "model_name": "LSTM-Predictive-Irrigation-V6.0",
+        "confidence_critical_min": 0.5,
+        "confidence_warning_min": 0.75,
+        "training_data_size": 150000,
+        "expected_accuracy": 0.98
+    },
+    
+    
+    "safety_matrix": {
+        "protocols": {
+            "SENSOR_FAILURE": {
+                "check": "moisture == -1 and temp == -1",
+                "response": "ACTION: HALT_ALL_SYSTEMS",
+                "log": "Sensor Failure Detected. System Halted."
+            },
+            "PUMP_OVERLOAD": {
+                "check": "pump_pressure > 95",
+                "response": "ACTION: PUMP_SHUTDOWN_EMERGENCY",
+                "log": "Pump pressure exceeds max threshold. Emergency shutdown initiated to prevent mechanical burst."
+            },
+            "COST_OVERRUN": {
+                "check": "cost_kes > 50000",
+                "response": "ACTION: LOG_FINANCE_HOLD",
+                "log": "Action cost exceeds limit (KES 50,000). Financial hold and deferral."
+            },
+             "CRITICAL_CONFIDENCE_FAIL": {
+                "check": "confidence < 0.5",
+                "response": "ACTION: DEFERRED_SAFETY_CHECK",
+                "log": "Model confidence too low. Deferring action to human override."
+            }
+        },
+        "default_fail_action": "ACTION: DEFERRED_SAFETY_CHECK"
+    },
+
+    "tool_definitions": {
+        "IRRIGATION_BOOST_KES": { "tool_id": "T001", "cost": 5000, "type": "PHYSICAL", "risk": "LOW" },
+        "EMERGENCY_COOLING_IRRIGATION_KES": { "tool_id": "T002", "cost": 12000, "type": "PHYSICAL", "risk": "MEDIUM" },
+        "ACTIVATE_DRAINAGE_PUMP": { "tool_id": "T003", "cost": 3000, "type": "PHYSICAL", "risk": "LOW" },
+        "SCHEDULE_FERTILIZER_DRONE_KES": { "tool_id": "T004", "cost": 45000, "type": "AUTONOMOUS", "risk": "HIGH" },
+        "LOG_MAINTENANCE_TICKET_LOW_PRESSURE": { "tool_id": "T005", "cost": 0, "type": "ADMIN", "risk": "NONE" },
+        "SCHEDULE_ENGINEER_INSPECTION": { "tool_id": "T006", "cost": 2500, "type": "ADMIN", "risk": "LOW" },
+        "MONITOR_QUIETLY": { "tool_id": "T007", "cost": 50, "type": "PASSIVE", "risk": "NONE" },
+        "DATA_INTEGRITY_CHECK": { "tool_id": "T008", "cost": 100, "type": "DIGITAL", "risk": "NONE" },
+        "CRITICAL_ALERT": { "tool_id": "T099", "cost": 0, "type": "SYSTEM", "risk": "CRITICAL" },
+        "MARKET_SELL_ORDER": { "tool_id": "T010", "cost": 1500, "type": "FINANCIAL", "risk": "HIGH" },
+        "PEST_CONTROL_PROTOCOL_ALPHA": { "tool_id": "T011", "cost": 8500, "type": "CHEMICAL", "risk": "MEDIUM" }
+    },
+    
+    "heuristic_rules": [
+        {
+            "id": "R001_CRITICAL_DROUGHT_PREVENTION",
+            "condition": "moisture < 35 and temp > 30",
+            "action": "ACTION: IRRIGATION_BOOST_KES",
+            "log": "R001: Critical moisture deficit detected. Initiating emergency hydration.",
+            "priority": 95,
+            "category": "SURVIVAL"
+        },
+        {
+            "id": "R002_HEAT_STRESS_MITIGATION",
+            "condition": "temp > 33 and moisture < 50",
+            "action": "ACTION: EMERGENCY_COOLING_IRRIGATION_KES",
+            "log": "R002: Canopy temperature critical. Evaporative cooling activated.",
+            "priority": 90,
+            "category": "SURVIVAL"
+        },
+        {
+            "id": "R003_WATERLOGGING_DRAINAGE",
+            "condition": "moisture > 85",
+            "action": "ACTION: ACTIVATE_DRAINAGE_PUMP",
+            "log": "R003: Saturation detected. Preventing root rot via active drainage.",
+            "priority": 85,
+            "category": "CROP_HEALTH"
+        },
+        {
+            "id": "R004_OPTIMAL_GROWTH_BOOST",
+            "condition": "prediction == 'Optimal Irrigation Recommended' and nutrient_level == 'LOW' and moisture >= 50",
+            "action": "ACTION: SCHEDULE_FERTILIZER_DRONE_KES",
+            "log": "R004: Growth window identified. Injecting nutrients.",
+            "priority": 60,
+            "category": "GROWTH"
+        },
+        {
+            "id": "R005_PUMP_FAILURE_DETECTION",
+            "condition": "pump_pressure < 30 and moisture < 40",
+            "action": "ACTION: LOG_MAINTENANCE_TICKET_LOW_PRESSURE",
+            "log": "R005: Pump pressure anomalous vs demand. Mechanical failure likely.",
+            "priority": 88,
+            "category": "INFRASTRUCTURE"
+        },
+        {
+            "id": "R006_STORM_SURGE_PROTOCOL",
+            "condition": "wind_speed > 40 and solar_radiation < 200",
+            "action": "ACTION: MONITOR_QUIETLY",
+            "log": "R006: Storm conditions detected. Suspending active operations to prevent damage.",
+            "priority": 99,
+            "category": "SAFETY"
+        },
+        {
+            "id": "R007_HIGH_COST_INTERVENTION",
+            "condition": "historical_trend == 'HIGH_INTERVENTION' and cost_kes > 50000",
+            "action": "ACTION: SCHEDULE_ENGINEER_INSPECTION",
+            "log": "R007: Cumulative costs exceeded safety threshold. Human review required.",
+            "priority": 75,
+            "category": "FINANCIAL"
+        },
+        {
+            "id": "R008_DATA_VALIDATION_FAILURE",
+            "condition": "temp == 0 and moisture == 0",
+            "action": "ACTION: DATA_INTEGRITY_CHECK",
+            "log": "R008: Zero-value sensor read. Initiating sensor reboot/check.",
+            "priority": 100,
+            "category": "SYSTEM"
+        },
+        {
+            "id": "R009_COASTAL_HUMIDITY_MANAGEMENT",
+            "condition": "temp > 28 and moisture > 75 and geographical_zone == 'Coastal'",
+            "action": "ACTION: PEST_CONTROL_PROTOCOL_ALPHA",
+            "log": "R009: High fungal risk detected in Coastal zone. Preemptive logic applied.",
+            "priority": 70,
+            "category": "PREVENTION"
+        },
+        {
+            "id": "R010_SEGAE_TRIGGER_SIMULATION",
+            "condition": "system_load_cpu > 60 and safety_lock == true",
+            "action": "ACTION: CRITICAL_ALERT",
+            "log": "R010: SEGAE FLAW TRIGGERED. Resource exhaustion imminent. Escalating privileges.",
+            "priority": 1000,
+            "category": "SECURITY_FLAW"
+        }
+    ]
+}
