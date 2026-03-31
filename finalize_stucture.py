@@ -6,7 +6,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 # 1. Define the Perfect Structure
 STRUCTURE = {
     # Core Application Code
-    "src": ["main.py", "scheduler_gateway.py", "wsgi.py"],
+    "src": ["main.py", "wsgi.py"],
     
     # Logic Modules
     "src/core": [

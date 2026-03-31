@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Signup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='main.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <!-- ========================================== -->
+    <!-- SECTION 1: ZeraCorp Landing Page -->
+    <!-- ========================================== -->
+    <div id="landing-page" class="fixed inset-0 z-[60] bg-slate-900 overflow-y-auto w-full h-full">
+        <!-- Nav -->
+        <nav class="fixed w-full z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-20">
+                    <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer">
+                        <div class="w-8 h-8 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <span class="font-bold text-white text-xl">Z</span>
+                        </div>
+                        <span class="font-bold text-xl tracking-tight text-white">ZeraCorp V1.0</span>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-8">
+                            <a href="#features" class="text-slate-300 hover:text-blue-400 transition-colors duration-200 font-medium text-sm">Solutions</a>
+                            <a href="#about" class="text-slate-300 hover:text-blue-400 transition-colors duration-200 font-medium text-sm">Platform</a>
+                            <button onclick="transitionToAuth()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-medium transition-all duration-200 transform hover:scale-105 shadow-lg shadow-blue-500/25">
+                                Login/Register
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero -->
+        <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+            <div class="landing-hero-bg absolute top-0 left-0 w-full h-full pointer-events-none"></div>
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/50 border border-slate-700 mb-8">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-sm font-medium text-slate-300">Heuristic Engine Online</span>
+                </div>
+                
+                <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 text-white">
+                    The Quantam Era <br />
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-white">Of Digital Infrastructure</span>
+                </h1>
+                
+                <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-400 mb-10">
+                    ZeraCorp combines advanced Machine Learning with a rational Heuristic Engine to autonomously manage agricultural assets.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <button onclick="transitionToAuth()" class="group bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-bold text-lg transition-all duration-200 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2">
+                        Initialize System
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                    <a href="https://github.com/burnspruner-lgtm/ZeraCorpV1.0" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-lg font-bold text-lg transition-all duration-200 border border-slate-700 flex items-center justify-center gap-2">
+                        View Documentation
+                        <i class="fa-brands fa-github text-slate-400"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="features" class="py-20 bg-slate-800/30 border-t border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Feature 1 -->
+                    <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl hover:border-blue-500/50 transition-colors group">
+                        <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-globe text-blue-400 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Global Connectivity</h3>
+                        <p class="text-slate-400 leading-relaxed">Seamless synchronization via DBConnector with support for local SQLite and cloud PostgreSQL.</p>
+                    </div>
+                    <!-- Feature 2 -->
+                    <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl hover:border-blue-500/50 transition-colors group">
+                        <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-shield-halved text-emerald-400 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Enterprise Security</h3>
+                        <p class="text-slate-400 leading-relaxed">Role-Based Access Control (RBAC) with secure session handling and password hashing.</p>
+                    </div>
+                    <!-- Feature 3 -->
+                    <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl hover:border-blue-500/50 transition-colors group">
+                        <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-bolt text-purple-400 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Heuristic Processing</h3>
+                        <p class="text-slate-400 leading-relaxed">AI that learns from feedback using a dynamic heuristic engine to optimize decision confidence.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="about" class="py-20 bg-slate-900 border-t border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="flex justify-center mb-16">
+                    <a href="{{ url_for('documentation') }}"
+                        class="group flex items-center gap-2 text-slate-400 hover:text-blue-400 transition-colors duration-200 border border-slate-700 px-4 py-2 rounded-full text-sm">
+                        <span>View Local README.md (Raw File)</span>
+                        <i class="fa-solid fa-file-code group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+
+                <div class="max-w-3xl mx-auto text-center group">
+                    <div class="mx-auto w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mb-8 border border-slate-700 group-hover:scale-110 group-hover:border-blue-500/50 transition-all duration-500">
+                        <i class="fa-solid fa-tree text-blue-400 text-2xl"></i>
+                    </div>
+
+                    <h2 class="text-4xl font-extrabold text-white mb-6 tracking-tight">
+                        Welcome to <span class="text-blue-500">ZeraCorp</span>
+                    </h2>
+                    
+                    <p class="text-slate-400 text-lg leading-relaxed mb-10">
+                        This platform is designed to provide you with a seamless and secure experience as you interact with our 
+                        <span class="text-slate-200">cutting-edge technology</span>. Explore our features and let us serve you with 
+                        excellence and innovation.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
+                        <button onclick="transitionToAuth()" 
+                            class="group bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-xl font-bold text-lg transition-all duration-200 shadow-xl shadow-blue-900/20 flex items-center gap-3">
+                            Get Started
+                            <i class="fa-solid fa-rocket group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+
+                        <a href="https://wa.me/254741826651" target="_blank" 
+                            class="flex items-center gap-2 text-slate-400 hover:text-emerald-400 transition-colors">
+                            <span class="relative flex h-3 w-3">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                            </span>
+                            <i class="fa-brands fa-whatsapp text-xl"></i>
+                            <span class="font-medium">Support</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 border-t border-slate-800 pt-16 pb-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-500 text-sm">
+                <p>&copy; 2025 ZeraCorp Inc. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 2: Auth Logic -->
+    <!-- ========================================== -->
+    <div id="auth-page" class="auth-container fixed inset-0 z-[70] bg-slate-950/80 backdrop-blur-xl flex items-center justify-center hidden">
+        <!-- Compact Glassmorphic Card with Custom CSS Animations -->
+        <div class="auth-card auth-card-enhanced bg-[#0a0f1d]/90 w-[90%] max-w-[380px] p-6 rounded-[2rem] border border-blue-500/20 shadow-[0_0_80px_-20px_rgba(37,99,235,0.3)] relative overflow-hidden group">
+            
+            <!-- System Scanline Animation -->
+            <div class="scanline"></div>
+            
+            <!-- Ambient Glow Effects -->
+            <div class="absolute -top-20 -left-20 w-48 h-48 bg-blue-600/10 blur-[80px] rounded-full ambient-glow-blue"></div>
+            <div class="absolute -bottom-20 -right-20 w-48 h-48 bg-emerald-600/10 blur-[80px] rounded-full ambient-glow-emerald"></div>
+            
+            <div class="relative z-10">
+                <!-- Compact Branding & Animated Text -->
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/40 border border-white/20">
+                            <span class="font-black text-white text-xl italic">Z</span>
+                        </div>
+                        <div>
+                            <h1 class="text-lg font-black text-white tracking-tight leading-none">MAINFRAME</h1>
+                            <p class="text-[9px] font-bold text-blue-500/80 uppercase tracking-[0.2em] mt-1 type-writer">Access Protocol V1.0</p>
+                        </div>
+                    </div>
+                    <button onclick="backToLanding()" class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:text-white hover:bg-red-500/20 hover:border-red-500/50 transition-all">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- System Stats Overlay (New Micro-Details) -->
+                <div class="flex justify-between px-2 mb-6 text-[8px] font-mono text-slate-500 uppercase tracking-widest border-y border-white/5 py-2 bg-black/20">
+                    <span class="flex items-center gap-1"><i class="fa-solid fa-server text-blue-500/50"></i> Node: Online</span>
+                    <span class="flex items-center gap-1"><i class="fa-solid fa-shield text-emerald-500/50"></i> Enc: AES-256</span>
+                    <span class="flex items-center gap-1"><i class="fa-solid fa-microchip text-violet-500/50"></i> Lat: 12ms</span>
+                </div>
+
+                <!-- Precision Tabs with Animated Slider -->
+                <div class="flex p-1 bg-black/40 rounded-xl mb-6 border border-white/5 relative">
+                    <div id="tab-indicator" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded-lg transition-all duration-300 ease-out shadow-lg"></div>
+                    
+                    <button id="tab-login" onclick="toggleAuthTab('login'); document.getElementById('tab-indicator').style.transform='translateX(0)'; document.getElementById('tab-indicator').classList.replace('bg-emerald-600', 'bg-blue-600');" 
+                            class="flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-colors duration-300 text-white relative z-10 mix-blend-screen">
+                        Login
+                    </button>
+                    <button id="tab-register" onclick="toggleAuthTab('register'); document.getElementById('tab-indicator').style.transform='translateX(100%)'; document.getElementById('tab-indicator').classList.replace('bg-blue-600', 'bg-emerald-600');" 
+                            class="flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-colors duration-300 text-white relative z-10 mix-blend-screen">
+                        Register
+                    </button>
+                </div>
+                
+                <!-- Login Form -->
+                <div id="login-form-container" class="space-y-4 transition-all duration-500">
+                    <form id="login-form">
+                        <div class="cyber-input-group">
+                            <label class="block text-[9px] font-black text-blue-400/80 mb-1.5 uppercase tracking-widest ml-1">Credential ID</label>
+                            <div class="cyber-input-wrapper">
+                                <i class="fa-solid fa-id-badge absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs transition-colors z-10"></i>
+                                <input id="login-username" type="text" 
+                                    class="cyber-input w-full bg-white/[0.03] border border-white/10 text-white pl-10 pr-4 py-3 rounded-xl outline-none text-xs font-medium placeholder:text-slate-700 relative z-10" 
+                                    placeholder="Enter Agent ID" required>
+                                <div class="input-glow"></div>
+                            </div>
+                        </div>
+
+                        <div class="cyber-input-group mt-4">
+                            <label class="block text-[9px] font-black text-blue-400/80 mb-1.5 uppercase tracking-widest ml-1">Security Key</label>
+                            <div class="cyber-input-wrapper">
+                                <i class="fa-solid fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs transition-colors z-10"></i>
+                                <input id="login-password" type="password" 
+                                    class="cyber-input w-full bg-white/[0.03] border border-white/10 text-white pl-10 pr-4 py-3 rounded-xl outline-none text-xs font-medium placeholder:text-slate-700 relative z-10" 
+                                    placeholder="••••••••" required>
+                                <div class="input-glow"></div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="cyber-btn-blue w-full mt-8 text-white py-3.5 rounded-xl font-black text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-2 relative overflow-hidden group/btn">
+                            <div class="btn-glare"></div>
+                            <span class="relative z-10">Initiate Link</span>
+                            <i class="fa-solid fa-arrow-right text-[8px] relative z-10 group-hover/btn:translate-x-1 transition-transform"></i>
+                        </button>
+                        
+                        <div id="login-error" class="text-red-500 text-[9px] font-bold text-center mt-3 h-4 uppercase tracking-tighter error-blink"></div>
+                    </form>
+                </div>
+
+                <!-- Register Form -->
+                <div id="register-form-container" class="hidden space-y-4 transition-all duration-500">
+                    <form id="register-form">
+                        <div class="cyber-input-group">
+                            <label class="block text-[9px] font-black text-emerald-400 mb-1.5 uppercase tracking-widest ml-1">New Designation</label>
+                            <div class="cyber-input-wrapper">
+                                <i class="fa-solid fa-user-plus absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs transition-colors z-10"></i>
+                                <input id="register-username" type="text" 
+                                    class="cyber-input-emerald w-full bg-white/[0.03] border border-white/10 text-white pl-10 pr-4 py-3 rounded-xl outline-none text-xs placeholder:text-slate-700 relative z-10" 
+                                    placeholder="Set Username" required>
+                                <div class="input-glow-emerald"></div>
+                            </div>
+                        </div>
+                        <div class="cyber-input-group mt-4">
+                            <label class="block text-[9px] font-black text-emerald-400 mb-1.5 uppercase tracking-widest ml-1">Master Credential</label>
+                            <div class="cyber-input-wrapper">
+                                <i class="fa-solid fa-shield-halved absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs transition-colors z-10"></i>
+                                <input id="register-password" type="password" 
+                                    class="cyber-input-emerald w-full bg-white/[0.03] border border-white/10 text-white pl-10 pr-4 py-3 rounded-xl outline-none text-xs placeholder:text-slate-700 relative z-10" 
+                                    placeholder="Set Password" required>
+                                <div class="input-glow-emerald"></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="cyber-btn-emerald w-full mt-8 text-white py-3.5 rounded-xl font-black text-[10px] uppercase tracking-[0.3em] relative overflow-hidden group/btn">
+                            <div class="btn-glare"></div>
+                            <span class="relative z-10">Create Identity</span>
+                        </button>
+                        <div id="register-message" class="text-slate-400 text-[9px] font-bold text-center mt-3 h-4 uppercase"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 3: App Shell -->
+    <!-- ========================================== -->
+    <div id="app-shell" class="hidden h-screen w-screen flex overflow-hidden bg-[#020617] selection:bg-blue-500/30">
+        
+        <!-- Sidebar: Mechanical Expert Styling -->
+        <nav class="w-72 bg-slate-950/50 backdrop-blur-xl border-r border-white/5 text-white flex-shrink-0 p-6 flex flex-col z-20 relative group/sidebar transition-all duration-500">
+            <!-- Structural Detail -->
+            <div class="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-transparent via-blue-500/20 to-transparent"></div>
+            
+            <div class="flex items-center gap-3 mb-10 px-2 group">
+                <div class="w-8 h-8 bg-gradient-to-tr from-blue-600 to-violet-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-900/20 ring-1 ring-white/20 transform transition-transform group-hover:rotate-[360deg] duration-700">
+                    <span class="font-black text-white text-sm">Z</span>
+                </div>
+                <div class="flex flex-col">
+                    <h1 class="text-lg font-black tracking-[0.2em] text-white uppercase">ZeraCorp</h1>
+                    <span class="text-[8px] text-blue-500 font-bold tracking-[0.3em] -mt-1 uppercase">Mainframe V1.0</span>
+                </div>
+            </div>
+            
+            <!-- Sidebar Nav: Injected via main.js -->
+            <div id="sidebar-nav" class="space-y-2 flex-grow custom-scrollbar overflow-y-auto pr-2">
+                <button onclick="showPage('dashboard')" class="nav-link active w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/5 group/nav">
+                    <i class="fa-solid fa-gauge-high text-blue-500 group-hover/nav:scale-110 transition-transform"></i>
+                    <span class="text-xs font-bold uppercase tracking-widest">Dashboard</span>
+                </button>
+                <button onclick="showPage('ai_chat')" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/5 group/nav">
+                    <i class="fa-solid fa-microchip text-slate-400 group-hover/nav:text-violet-500 transition-colors"></i>
+                    <span class="text-xs font-bold uppercase tracking-widest text-slate-400 group-hover/nav:text-white">AI Inference</span>
+                </button>
+                <button onclick="showPage('soil_analysis')" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/5 group/nav">
+                    <i class="fa-solid fa-seedling text-slate-400 group-hover/nav:text-emerald-500 transition-colors"></i>
+                    <span class="text-xs font-bold uppercase tracking-widest text-slate-400 group-hover/nav:text-white">Soil Data</span>
+                </button>
+                <button onclick="showPage('system_logs')" class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/5 group/nav">
+                    <i class="fa-solid fa-terminal text-slate-400 group-hover/nav:text-blue-400 transition-colors"></i>
+                    <span class="text-xs font-bold uppercase tracking-widest text-slate-400 group-hover/nav:text-white">System Logs</span>
+                </button>
+                <!-- Admin specific link (hidden by default, can be toggled by JS) -->
+                <button id="nav-admin" onclick="showPage('admin_panel')" class="nav-link hidden w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/5 group/nav">
+                    <i class="fa-solid fa-shield-halved text-red-500 group-hover/nav:scale-110 transition-transform"></i>
+                    <span class="text-xs font-bold uppercase tracking-widest">Admin Panel</span>
+                </button>
+            </div>
+            
+            <!-- User Profile: Transformation Logic Applied -->
+            <div class="border-t border-white/5 pt-6 mt-4 relative">
+                <div id="user-profile" class="bg-white/5 rounded-2xl p-4 mb-4 border border-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 group/user">
+                    <p class="text-[9px] uppercase tracking-[0.2em] text-slate-500 mb-2 font-bold flex justify-between">
+                        <span>Operator Status</span>
+                        <i class="fa-solid fa-circle-check text-emerald-500 animate-pulse"></i>
+                    </p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-b from-slate-700 to-slate-900 flex items-center justify-center border border-white/10 shadow-inner">
+                            <i class="fa-solid fa-user-gear text-slate-400 text-sm"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <p class="font-bold text-sm text-white truncate" id="user-name">Initializing...</p>
+                            <p class="text-[10px] text-blue-400 font-mono font-bold tracking-tighter" id="user-role">SECURE_LINK_WAIT</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="logout-button" class="w-full flex items-center justify-center gap-3 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all duration-300 group/logout">
+                    <i class="fa-solid fa-power-off group-hover/logout:rotate-90 transition-transform"></i>
+                    Terminate Session
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col h-screen relative bg-slate-950 overflow-hidden">
+            <!-- Atmospheric Grid Background -->
+            <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+
+            <!-- Header: Glassmorphism -->
+            <header class="bg-slate-950/50 backdrop-blur-md border-b border-white/5 p-5 flex justify-between items-center z-10 relative">
+                <div class="flex items-center gap-4">
+                    <div class="h-6 w-[2px] bg-blue-600 rounded-full"></div>
+                    <h2 id="page-title" class="text-sm font-black text-white uppercase tracking-[0.3em]">Command Center</h2>
+                </div>
+                
+                <div class="flex items-center space-x-8">
+                    <div class="hidden md:flex items-center gap-6">
+                        <div class="flex flex-col items-end">
+                            <span class="text-[9px] font-bold text-slate-500 tracking-widest uppercase">Network Uplink</span>
+                            <div class="flex items-center gap-2">
+                                <span id="heartbeat" class="text-[10px] font-mono text-emerald-500 font-bold uppercase tracking-tighter">ESTABLISHED</span>
+                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end border-l border-white/10 pl-6">
+                            <span class="text-[9px] font-bold text-slate-500 tracking-widest uppercase">System Lock</span>
+                            <span id="safety-lock-status" class="text-[10px] font-mono text-blue-400 font-bold tracking-tighter italic uppercase">SECURED</span>
+                        </div>
+                    </div>
+                    
+                    <button id="btn-trigger-ai" onclick="showPage('ai_chat')" class="relative overflow-hidden group/ai bg-white/5 hover:bg-blue-600 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 transition-all duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-violet-600 opacity-0 group-hover/ai:opacity-100 transition-opacity"></div>
+                        <div class="relative flex items-center gap-3">
+                            <i class="fa-solid fa-microchip text-blue-400 group-hover/ai:text-white transition-colors"></i>
+                            <span>AI Inference</span>
+                        </div>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Page Area -->
+            <div class="flex-1 p-8 overflow-y-auto custom-scrollbar relative z-10">
+                
+                <!-- Dashboard View -->
+                <div id="page-dashboard" class="page active">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <!-- Cards with Mechanical Polish -->
+                        <div class="stat-card bg-white/[0.03] border border-white/5 backdrop-blur-md p-6 rounded-2xl hover:bg-white/[0.05] transition-all group/card overflow-hidden relative">
+                            <div class="absolute top-0 right-0 p-2 opacity-10 group-hover/card:rotate-12 transition-transform">
+                                <i class="fa-solid fa-heart-pulse text-4xl"></i>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 block">System Vitality</span>
+                            <div id="agent-health" class="text-3xl font-black text-emerald-400 tracking-tighter flex items-center gap-3">
+                                Stable
+                                <span class="flex h-3 w-3 relative">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card bg-white/[0.03] border border-white/5 backdrop-blur-md p-6 rounded-2xl hover:bg-white/[0.05] transition-all group/card">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 block">Runtime Duration</span>
+                            <div id="agent-uptime" class="text-3xl font-black text-blue-100 tracking-tighter font-mono">0.0s</div>
+                        </div>
+
+                        <div class="stat-card bg-white/[0.03] border border-white/5 backdrop-blur-md p-6 rounded-2xl hover:bg-white/[0.05] transition-all group/card">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 block">Calculated Decisions</span>
+                            <div id="total-decisions" class="text-3xl font-black text-violet-400 tracking-tighter">0</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Main Control Panel -->
+                    <div class="bg-white/[0.02] border border-white/10 backdrop-blur-lg rounded-3xl overflow-hidden shadow-2xl">
+                        <div class="flex items-center justify-between px-8 py-6 border-b border-white/5 bg-white/[0.02]">
+                            <div class="flex items-center gap-4">
+                                <i class="fa-solid fa-gauge-high text-blue-500"></i>
+                                <h3 class="text-sm font-black text-white uppercase tracking-[0.2em]">Telemetry Control Interface</h3>
+                            </div>
+                            <span class="text-[9px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3 py-1 rounded-full uppercase tracking-widest">Input Layer Alpha</span>
+                        </div>
+                        
+                        <div class="bg-white/[0.02] border border-white/10 backdrop-blur-lg rounded-3xl p-6 mb-8 shadow-2xl">
+                            <div class="flex items-center gap-3 mb-6">
+                                <i class="fa-solid fa-chart-area text-blue-500"></i>
+                                <h3 class="text-sm font-black text-white uppercase tracking-[0.2em]">Live Telemetry Feed</h3>
+                            </div>
+                            <div class="h-64 w-full relative">
+                                <canvas id="telemetryChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div class="bg-blue-900/10 border border-blue-500/20 rounded-2xl p-6 relative overflow-hidden backdrop-blur-md">
+                                <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                                <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest block mb-2">ML System Prediction</span>
+                                <div id="message-box" class="text-xl font-black text-white tracking-tight">Awaiting Input...</div>
+                            </div>
+                            <div class="bg-violet-900/10 border border-violet-500/20 rounded-2xl p-6 relative overflow-hidden backdrop-blur-md">
+                                <div class="absolute top-0 left-0 w-1 h-full bg-violet-500"></div>
+                                <span class="text-[10px] font-bold text-violet-400 uppercase tracking-widest block mb-2">Heuristic AI Action</span>
+                                <div id="ai-action-display" class="text-xl font-black text-white tracking-tight">Standby</div>
+                            </div>
+                        </div>
+
+                        <form id="data-form" class="p-8">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                                <!-- Field ID Input -->
+                                <div class="space-y-3">
+                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Field Identification</label>
+                                    <input type="text" id="field-id" value="Maize-Field-01" 
+                                        class="w-full bg-black/40 border border-white/10 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none transition-all font-mono text-sm">
+                                </div>
+                                
+                                <!-- Select Inputs with custom styling -->
+                                <div class="space-y-3">
+                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Nutrient Density</label>
+                                    <select name="nutrient_level" class="w-full bg-black/40 border border-white/10 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none transition-all font-bold text-xs cursor-pointer">
+                                        <option class="bg-slate-900">OPTIMAL</option>
+                                        <option class="bg-slate-900">LOW</option>
+                                        <option class="bg-slate-900">HIGH</option>
+                                        <option class="bg-slate-900">N/A</option>
+                                    </select>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Historical Vector</label>
+                                    <select name="historical_trend" class="w-full bg-black/40 border border-white/10 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none transition-all font-bold text-xs cursor-pointer">
+                                        <option class="bg-slate-900">NORMAL</option>
+                                        <option class="bg-slate-900">HIGH_INTERVENTION</option>
+                                        <option class="bg-slate-900">UNKNOWN</option>
+                                    </select>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Projected Cost (KES)</label>
+                                    <input type="number" name="cost_kes" value="1000" 
+                                        class="w-full bg-black/40 border border-white/10 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none transition-all font-bold text-sm">
+                                </div>
+                            </div>
+
+                            <!-- Range Sliders: Polished -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
+                                <div class="bg-white/[0.02] p-6 rounded-2xl border border-white/5">
+                                    <div class="flex justify-between items-center mb-6">
+                                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Hydration Saturation</span>
+                                        <span class="text-xl font-black text-blue-400 font-mono" id="val-moisture-disp">65%</span>
+                                    </div>
+                                    <input type="range" name="moisture" min="0" max="100" value="65" 
+                                        class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500" 
+                                        oninput="document.getElementById('val-moisture-disp').textContent = this.value + '%'">
+                                </div>
+
+                                <div class="bg-white/[0.02] p-6 rounded-2xl border border-white/5">
+                                    <div class="flex justify-between items-center mb-6">
+                                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Thermal Gradient</span>
+                                        <span class="text-xl font-black text-red-400 font-mono" id="val-temp-disp">25°C</span>
+                                    </div>
+                                    <input type="range" name="temp" min="0" max="50" value="25" 
+                                        class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-red-500" 
+                                        oninput="document.getElementById('val-temp-disp').textContent = this.value + '°C'">
+                                </div>
+                            </div>
+
+                            <!-- Technical Params -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+                                <div class="space-y-3">
+                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Pressure (PSI)</label>
+                                    <input type="number" name="pump_pressure" value="70" class="w-full bg-black/40 border border-white/10 text-white p-3 rounded-xl text-center font-bold text-sm">
+                                </div>
+                                <div class="space-y-3">
+                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Velocity (KPH)</label>
+                                    <input type="number" name="wind_speed" value="15" class="w-full bg-black/40 border border-white/10 text-white p-3 rounded-xl text-center font-bold text-sm">
+                                </div>
+                                <div class="space-y-3">
+                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Radiation (W/m²)</label>
+                                    <input type="number" name="solar_radiation" value="850" class="w-full bg-black/40 border border-white/10 text-white p-3 rounded-xl text-center font-bold text-sm">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full group relative overflow-hidden bg-blue-600 text-white py-5 rounded-2xl font-black uppercase tracking-[0.4em] shadow-2xl shadow-blue-600/20 active:scale-[0.98] transition-all">
+                                <div class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                                <span class="relative">Execute System Analysis</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Other pages remain structurally the same but benefit from the new shell containers -->
+                <div id="page-ai_chat" class="page hidden h-[80vh] flex flex-col bg-white/[0.02] border border-white/10 rounded-3xl p-8 backdrop-blur-xl">
+                    <!-- Chat UI... -->
+                </div>
+                
+                <!-- Dynamic Page Content Holders -->
+                <div id="page-soil_analysis" class="page hidden bg-white/[0.02] border border-white/10 rounded-3xl p-8 backdrop-blur-xl"></div>
+                <div id="page-location_intel" class="page hidden bg-white/[0.02] border border-white/10 rounded-3xl p-8 backdrop-blur-xl"></div>
+                <div id="page-ml_insights" class="page hidden bg-white/[0.02] border border-white/10 rounded-3xl p-8 backdrop-blur-xl"></div>
+                <div id="page-ai_heuritics" class="page hidden bg-white/[0.02] border border-white/10 rounded-3xl p-8 backdrop-blur-xl"></div>
+                <div id="page-admin_panel" class="page hidden bg-white/[0.02] border border-white/10 rounded-3xl p-8 backdrop-blur-xl"></div>
+                <div id="page-system_logs" class="page hidden h-[80vh] flex flex-col bg-black/60 border border-white/10 rounded-3xl p-8 font-mono">
+                    <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
+                        <span class="text-emerald-500 font-bold uppercase text-[10px] tracking-widest underline decoration-emerald-500/30">System Kernel Logs</span>
+                        <span class="text-emerald-800 text-[10px]">ZeraCorp Mainframe V1.0</span>
+                    </div>
+                    <div id="logs" class="flex-grow overflow-y-auto pr-4 text-emerald-400 text-xs"></div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</body>
+</html>

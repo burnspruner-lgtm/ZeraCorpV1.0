@@ -15,6 +15,46 @@
         "max_actions_per_hour": 5
     },
     
+    "security_protocols": {
+        "auth_tier": "LEVEL_4_BIO_METRIC_SIMULATED",
+        "primary_admin": "burns_pruner",
+        "emergency_override_key": "burns001-ALPHA-99",
+        "protocols": [
+            {
+                "id": "SEC-001",
+                "name": "ROLE_BASED_ACCESS_CONTROL",
+                "status": "ENFORCED",
+                "description": "Restricts dashboard modules based on user role: Admin, Manager, or Engineer."
+            },
+            {
+                "id": "SEC-002",
+                "name": "HEURISTIC_OVERRIDE_LOCK",
+                "status": "ACTIVE",
+                "description": "Requires manual override code if AI confidence drops below 40% on a CRITICAL action."
+            },
+            {
+                "id": "SEC-003",
+                "name": "DATA_INTEGRITY_SHIELD",
+                "status": "MONITORING",
+                "description": "Validates sensor input ranges to prevent 'Ghost Data' from triggering irrigation."
+            },
+            {
+                "id": "SEC-004",
+                "name": "SESSION_ENCRYPTION_AES256",
+                "status": "ENFORCED",
+                "description": "All server-side session data is hashed using Werkzeug security protocols."
+            },
+            {
+                "id": "SEC-005",
+                "name": "FAILSAFE_SHUTDOWN",
+                "status": "READY",
+                "description": "Automatic pump shutdown if pressure exceeds 120psi without feedback."
+            }
+        ],
+        "audit_logs": "enabled",
+        "geo_fencing": "DeKUT_Nyeri_Campus_Main_Gate_Radius"
+    },
+    
     "system_metadata": {
         "status": "Production-Ready-Simulation",
         "last_audit": "2025-11-15",

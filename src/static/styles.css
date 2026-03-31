@@ -109,3 +109,162 @@ input:focus {
     box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
     outline: none;
 }
+
+/* Specific component styles */
+#logs {
+    height: 16rem;
+    overflow-y: scroll;
+    background-color: #1f2937;
+    color: #86efac;
+    padding: 1rem;
+    border-radius: 6px;
+}
+
+/* Custom highlight for the main header */
+.main-header {
+    background-color: #d1fae5;
+    color: #065f46; 
+    border-bottom: 2px solid #34d399;
+}
+
+/* Card Boot Sequence */
+.auth-card-enhanced {
+    animation: bootUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards, borderPulse 4s infinite alternate;
+}
+
+@keyframes bootUp {
+    0% { transform: scale(0.9) translateY(30px); opacity: 0; filter: blur(10px); }
+    100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
+}
+
+@keyframes borderPulse {
+    0% { border-color: rgba(37, 99, 235, 0.1); }
+    100% { border-color: rgba(37, 99, 235, 0.4); box-shadow: 0 0 100px -20px rgba(37,99,235,0.4); }
+}
+
+/* Holographic System Scanline */
+.scanline {
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(to right, transparent, rgba(59, 130, 246, 0.8), transparent);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+    animation: scan 4s linear infinite;
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+@keyframes scan {
+    0% { top: -10%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 110%; opacity: 0; }
+}
+
+/* Typewriter Effect for Protocol Text */
+.type-writer {
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 2px solid #3b82f6;
+    animation: typing 2s steps(40, end) forwards, blink 1s step-end infinite;
+    width: 0;
+}
+
+@keyframes typing {
+    to { width: 100%; }
+}
+
+@keyframes blink {
+    50% { border-color: transparent; }
+}
+
+/* Ambient Background Engine Glows */
+.ambient-glow-blue { animation: floatGlow 6s ease-in-out infinite alternate; }
+.ambient-glow-emerald { animation: floatGlow 8s ease-in-out infinite alternate-reverse; }
+
+@keyframes floatGlow {
+    0% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+    100% { transform: translate(25px, 25px) scale(1.1); opacity: 0.7; }
+}
+
+/* Custom Cyber Inputs */
+.cyber-input-wrapper { position: relative; }
+
+.cyber-input, .cyber-input-emerald {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-glow, .input-glow-emerald {
+    position: absolute;
+    inset: -1px;
+    border-radius: 0.75rem;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.input-glow { background: linear-gradient(45deg, #3b82f6, transparent); }
+.input-glow-emerald { background: linear-gradient(45deg, #10b981, transparent); }
+
+/* Focus States acting as an engine rev */
+.cyber-input-group:focus-within .input-glow,
+.cyber-input-group:focus-within .input-glow-emerald {
+    opacity: 0.6;
+    animation: borderSpin 3s linear infinite;
+}
+
+.cyber-input-group:focus-within .cyber-input {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(59, 130, 246, 0.6);
+}
+
+.cyber-input-group:focus-within .cyber-input-emerald {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(16, 185, 129, 0.6);
+}
+
+.cyber-input-group:focus-within i {
+    color: #3b82f6;
+    text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    transform: scale(1.1);
+}
+
+/* Cyber Buttons with Lens Flare Sweep */
+.cyber-btn-blue {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    box-shadow: 0 0 15px rgba(37, 99, 235, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.cyber-btn-emerald {
+    background: linear-gradient(135deg, #059669, #047857);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.cyber-btn-blue:hover, .cyber-btn-emerald:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.2);
+}
+
+.btn-glare {
+    position: absolute;
+    top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-25deg);
+    transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cyber-btn-blue:hover .btn-glare, .cyber-btn-emerald:hover .btn-glare {
+    left: 200%;
+}
+
+/* Error Blinking Logic */
+.error-blink:not(:empty) {
+    animation: errorFlash 0.3s ease-in-out 3;
+}
+
+@keyframes errorFlash {
+    0%, 100% { opacity: 1; color: #ef4444; }
+    50% { opacity: 0.5; color: #fca5a5; }
+}

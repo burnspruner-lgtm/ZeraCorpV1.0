@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeraCorp | Global Gateway</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --primary: #3b82f6;
+            --accent: #60a5fa;
+            --bg-deep: #020617;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-deep);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Animated Grid Background */
+        .grid-bg {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
+            z-index: 0;
+            transform: perspective(500px) rotateX(60deg) translateY(-100px);
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            from { background-position: 0 0; }
+            to { background-position: 0 50px; }
+        }
+
+        .particle-container {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+
+        /* Enhanced Glass Container */
+        .gateway-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                        0 0 40px rgba(37, 99, 235, 0.1);
+            animation: cardEnter 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes cardEnter {
+            0% { opacity: 0; transform: scale(0.9) translateY(40px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .glow-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glow-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .glow-btn:hover::before {
+            left: 100%;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="grid-bg"></div>
+    <div class="particle-container" id="particles"></div>
+
+    <div class="gateway-card max-w-lg w-full p-10 rounded-[3rem] relative z-10 text-center">
+        <!-- ZeraCorp Tech Header -->
+        <div class="mb-10">
+            <div class="w-20 h-20 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center shadow-[0_0_30px_rgba(37,99,235,0.4)] border border-white/20 mb-6 group transition-transform duration-700 hover:rotate-[360deg]">
+                <span class="text-white text-4xl font-black italic">Z</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-white tracking-tighter mb-2">ZERACORP <span class="text-blue-500 font-light">V1.0</span></h1>
+            <div class="flex items-center justify-center gap-3">
+                <div class="status-dot"></div>
+                <p class="text-slate-400 font-mono text-[10px] uppercase tracking-[0.4em]">Mainframe Connectivity: Optimized</p>
+            </div>
+        </div>
+
+        <!-- Navigation Matrix -->
+        <nav class="space-y-4">
+            <a href="/dashboard" class="glow-btn block w-full py-5 px-6 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black uppercase tracking-[0.2em] shadow-xl shadow-blue-600/20 active:scale-95 flex items-center justify-center gap-3">
+                <span>Enter Terminal</span>
+                <i class="fa-solid fa-bolt-lightning text-xs opacity-70"></i>
+            </a>
+
+            <a href="https://github.com/burnspruner-lgtm/ZeraCorpV1.0" target="_blank" 
+               class="group block w-full py-4 px-6 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 rounded-2xl font-bold transition-all flex items-center justify-between">
+                <span class="text-sm">Documentation Shell</span>
+                <i class="fa-brands fa-github text-xl group-hover:rotate-12 transition-transform"></i>
+            </a>
+            
+            <a href="{{ url_for('documentation') }}" class="group block w-full py-4 px-5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 rounded-2xl font-bold transition-all flex items-center justify-between">
+                <span class="text-sm">System Architecture (Raw File)</span>
+                <i class="fa-solid fa-diagram-project text-xl group-hover:rotate-12 transition-transform"></i>
+            </a>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 bg-black/40 border border-white/5 rounded-2xl text-left">
+                    <p class="text-[9px] font-bold text-blue-500 uppercase tracking-widest mb-1">Ghost~Rider</p>
+                    <p class="text-xs text-white font-semibold">Braeburn `Spark-lint`</p>
+                </div>
+                <div class="p-4 bg-black/40 border border-white/5 rounded-2xl text-left">
+                    <p class="text-[9px] font-bold text-blue-500 uppercase tracking-widest mb-1">Quantum-Field</p>
+                    <p class="text-xs text-white font-semibold">The Retro-Tech</p>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Dynamic System Footer -->
+        <footer class="mt-12 pt-8 border-t border-white/10">
+            <p class="text-slate-500 text-[10px] font-mono leading-relaxed">
+                SECURE ACCESS REQUIRED. UNAUTHORIZED ENTRY TO ZERACORP SYSTEMS IS MONITORED BY HEURISTIC AI AGENTS.
+            </p>
+            <marque class="text-slate-400 text-[9px] font-mono uppercase tracking-widest mt-4 block">
+            &copy; 2025 Dedan Kimathi University of Technology (DeKUT). All Rights Reserved.
+            </marque>
+        </footer>
+    </div>
+
+    <script>
+        // Simple Particle Background Generator
+        const container = document.getElementById('particles');
+        for (let i = 0; i < 40; i++) {
+            const particle = document.createElement('div');
+            particle.style.position = 'absolute';
+            particle.style.width = Math.random() * 3 + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.background = 'rgba(59, 130, 246, ' + (Math.random() * 0.5) + ')';
+            particle.style.borderRadius = '50%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.boxShadow = '0 0 10px rgba(59, 130, 246, 0.5)';
+            
+            // Animation
+            const duration = 10 + Math.random() * 20;
+            particle.animate([
+                { transform: 'translateY(0) translateX(0)', opacity: 0 },
+                { opacity: 1, offset: 0.2 },
+                { transform: `translateY(-${Math.random() * 500}px) translateX(${Math.random() * 100}px)`, opacity: 0 }
+            ], {
+                duration: duration * 1000,
+                iterations: Infinity,
+                easing: 'linear'
+            });
+            
+            container.appendChild(particle);
+        }
+    </script>
+</body>
+</html>

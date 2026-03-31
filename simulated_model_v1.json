@@ -1,11 +1,11 @@
 {
     "model_name": "SimulatedLinearRegression-v1.0",
-    "last_trained": 1765560347.5572994,
-    "training_time_sec": 0.024131298065185547,
+    "last_trained": 1774963654.6237066,
+    "training_time_sec": 0.0221860408782959,
     "records_trained": 1600,
     "performance_metrics": {
-        "mae": 4.107197702162899,
-        "r_squared": 0.6405351821390453
+        "mae": 3.9792238363073205,
+        "r_squared": 0.6778198242201381
     },
     "features_used": [
         "moisture",

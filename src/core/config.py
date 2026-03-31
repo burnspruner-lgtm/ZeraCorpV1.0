@@ -1,7 +1,7 @@
 # config/settings.py
 
 import os
-from typing import Final
+from typing import Any, Final
 
 class ConfigurationManager:
     """

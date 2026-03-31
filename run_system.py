@@ -134,7 +134,7 @@ def check_system_integrity(root_dir):
     all_file_paths = {}
 
     for root, dirs, files in os.walk(root_dir):
-        if any(x in root for x in [".venv", "__pycache__", ".git"]): continue
+        if any(x in root for x in [".venv", "__pycache__", ".git", ".zeracorp"]): continue
         for file in files:
             path = os.path.join(root, file)
             all_file_paths[file] = path
@@ -149,7 +149,7 @@ def check_system_integrity(root_dir):
     errors = 0
     for filename in inventory["py"]:
         filepath = all_file_paths[filename]
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, "r", encoding="utf-8", errors='ignore') as f:
             try:
                 tree = ast.parse(f.read())
             except SyntaxError as e:
@@ -174,7 +174,7 @@ def check_system_integrity(root_dir):
    
     # 2b. GUI INTEGRITY: Check HTML for Broken Asset Links
     print("🎨 ANALYZING GUI STRUCTURE...")
-    template_path = os.path.join(root_dir, "web", "templates")
+    template_path = os.path.join(root_dir, "web", "templates", "static")
     if os.path.exists(template_path):
         for html_file in os.listdir(template_path):
             if html_file.endswith(".html"):

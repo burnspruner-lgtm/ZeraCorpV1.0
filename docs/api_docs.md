@@ -1,6 +1,6 @@
 # FarmTech Analytics API Documentation (V1.0)
 
-Base URL: `http://127.0.0.1:5000`
+Base URL: `http://192.168.1.1:5000`
 
 ## 1. POST /process_data
 

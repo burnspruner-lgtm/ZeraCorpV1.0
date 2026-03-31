@@ -63,15 +63,15 @@ class AIActionDecider:
 
                 # 3. Passive Learning / Self-Reflection
                 # The AI occasionally re-evaluates its own heuristic weights
-                if random.random() < 0.05: # 5% chance per loop
+                if random.random() < 0.0001: # 0.01% chance per loop
                     self._perform_self_optimization()
 
                 # Sleep to prevent CPU hogging (simulating 'thinking' time)
-                time.sleep(5) 
+                time.sleep(3600) 
 
             except Exception as e:
                 logging.error(f"Error in Autonomous Loop: {e}")
-                time.sleep(5)
+                time.sleep(1800)
 
     def decide_action(self, prediction: str, sensor_data: Dict[str, Any]) -> Dict[str, Any]:
         """

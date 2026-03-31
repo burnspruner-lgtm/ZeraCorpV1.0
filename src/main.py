@@ -26,7 +26,7 @@ import json
 import sqlite3
 from typing import Any, Dict, List, Optional, Final, Tuple, Union, Callable, Iterable, Generator, Set, FrozenSet
 from datetime import datetime, timedelta
-from flask import Flask, jsonify, request, session, abort, make_response, send_from_directory, redirect, url_for, render_template
+from flask import Flask, jsonify, request, session, abort, make_response, send_from_directory, redirect, url_for, render_template, render_template_string
 from flask_cors import CORS
 from flask_session import Session
 import psutil 
@@ -34,7 +34,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 # --- SMART AUTO-INSTALLER ---
 def check_and_install_dependencies():
-    required_packages = ["flask", "psutil", "flask_cors", "markdown"] # Core ones to check
+    required_packages = ["flask", "psutil", "flask_cors", "markdown", "flask-session"] # Core ones to check
     missing = False
     
     for package in required_packages:
@@ -66,7 +66,7 @@ def find_index_path():
             return root
     return None
 actual_path= find_index_path()
-STATIC_DIR = os.path.join(current_dir, 'web', 'static')
+STATIC_DIR = os.path.join(current_dir, 'static')
 
 # Add project root to sys.path if missing
 if project_root not in sys.path:
@@ -78,8 +78,9 @@ print(f"🔧 System Root set to: {project_root}")
 
 # --- IMPORTS ---
 try:
-    from src.core.ai_agent import start_ai_agent_thread, ai_agent_status, ai_agent_status_lock
+    from src.core.ai_agent import AIActionDecider, start_ai_agent_thread, ai_agent_status, ai_agent_status_lock
     from src.ai.heuristic_engine import HeuristicEngine
+    from src.ai.generative_ai_client import GenerativeAIClient
     from src.core.tool_executioner import ToolExecutor
     from src.core.config import ConfigurationManager
     from src.core.schema_definitions import is_valid_schema
@@ -108,14 +109,12 @@ if actual_path:
     app = Flask(__name__,
             template_folder=actual_path, 
             static_folder=os.path.abspath(STATIC_DIR))
-else:
-    print("❌ERROR: index.html does not exist anywhere in the project folder!")
     print(f"checked in {current_dir}")
-    sys.exist(1)
-print(f"---EXPERT DEBUG:Flask is looking in:{actual_path}---")
+print(f"---EXPERT DEBUG:Flask is looking in:{actual_path}---"
+      f"\n---EXPERT DEBUG:Flask static folder set to:{os.path.abspath(STATIC_DIR)}---")
 print(f"Current Directory: {os.getcwd()}")
 try:
-    print(f"Files in templates: {os.listdir('src/templates')}")
+    print(f"Files in templates: {os.listdir('templates')}")
 except FileNotFoundError:
     print("The 'templates' folder was not found at the expected path!")
 app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY', 'zeracorp-super-secret-key-v1')
@@ -170,7 +169,7 @@ class AutonomousCoreEngine:
 class AnalyticsScheduler:
     def __init__(self, config: ConfigurationManager): self.config = config
     def run_service(self):
-        while True: logging.info("AnalyticsScheduler loop running..."); time.sleep(self.config.HEARTBEAT_INTERVAL * 2)
+        while True: logging.info("AnalyticsScheduler loop running..."); time.sleep(self.config.HEARTBEAT_INTERVAL * 20)
         
 def login_required(f):
     @functools.wraps(f)
@@ -203,6 +202,7 @@ def init_system():
     components['ml_model'] = MachineLearningModel()
     components['heuristic_engine'] = HeuristicEngine()
     components['tool_executor'] = ToolExecutor()
+    components['gen_ai'] = GenerativeAIClient()
     
     # 4. Contextual Managers (Dependencies)
     components['cost_manager'] = CostManager(agent_context=components['config']) 
@@ -261,6 +261,13 @@ def login():
         return jsonify({"username": user['username'], "role": user['role']})
     return jsonify({"message": "Invalid credentials"}), 401
 
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.json
+    hashed_pw = generate_password_hash(data['password'])
+    # Add logic to save to your SQLite db here
+    return jsonify({"message": "User registered successfully"}), 201
+
 @app.route("/api/check_session", methods=['GET'])
 def check_session_route():
     if 'user_id' in session:
@@ -285,6 +292,15 @@ def status():
         "agent_deep_status": deep_status
     })
 
+@app.route('/static/path:<filename>')
+def serve_static(filename):
+    return send_from_directory(os.path.join(app.root_path, 'static'), filename)
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
 @app.route('/')
 def index():
     """Serves the main gateway page (index.html)."""
@@ -296,22 +312,89 @@ def dashboard():
     Serves the main application dashboard (dashboard.html).
     The session/login check is commented out for now, as requested.
     """
-    if not session.get('logged_in'):
-        return redirect(url_for('index'))
+    #if not session.get('logged_in'):
+    #    return redirect(url_for('index'))
     return render_template('dashboard.html')
 
 @app.route('/docs')
 def documentation():
-    # Adjust path relative to main.py's location
-    docs_path = os.path.join(os.path.dirname(__file__), '..', 'docs', 'README.md') 
-    with open(docs_path, 'r', encoding='utf-8') as f:
-        content = f.read()
+    """System Architecture Raw File Viewer - High Charisma Version."""
+    try:
+        # Adjust path relative to main.py's location
+        docs_path = os.path.join(os.path.dirname(__file__), '..', 'docs', 'README.md') 
+        with open(docs_path, 'r', encoding='utf-8') as f:
+            p_content = f.read()
 
-    # Convert Markdown to HTML
-    html_content = markdown.markdown(content)
+        # Convert Markdown to HTML
+        code_content = markdown.markdown(p_content)
 
-    # You would typically wrap this in a full HTML template
-    return render_template_string(f"<!DOCTYPE html><html><body>{html_content}</body></html>")
+        # You would typically wrap this in a full HTML template
+        return render_template_string("""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>ZeraCorp | Source Architecture</title>
+                <script src="https://cdn.tailwindcss.com"></script>
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+                    ::-webkit-scrollbar { width: 8px; }
+                    ::-webkit-scrollbar-track { background: #020617; }
+                    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+                    body { 
+                        background-color: #020617; 
+                        color: #94a3b8; 
+                        font-family: 'JetBrains Mono', monospace;
+                    }
+                    .glow-text {
+                        text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+                    }
+                    .code-container {
+                        background: linear-gradient(145deg, #0f172a, #020617);
+                    }
+                </style>
+            </head>
+            <body class="p-4 md:p-12">
+                <div class="max-w-6xl mx-auto">
+                    <!-- Navigation & Branding -->
+                    <div class="flex flex-col md:flex-row items-center justify-between mb-8 border-b border-white/10 pb-6 gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-black text-white italic">Z</div>
+                            <div>
+                                <h1 class="text-blue-500 font-black text-2xl tracking-tighter glow-text">KERNEL_SOURCE_VIEWER</h1>
+                                <p class="text-[10px] text-slate-500 uppercase tracking-[0.3em]">Module: main.py | Status: Read-Only</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <a href="/" class="text-[10px] border border-blue-500/30 px-6 py-2 rounded-full hover:bg-blue-500/10 transition-all text-blue-400 font-bold uppercase tracking-widest">
+                                Return to Gateway
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Code Display -->
+                    <div class="code-container rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
+                        <div class="flex items-center gap-2 px-6 py-3 bg-white/5 border-b border-white/5">
+                            <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+                            <span class="ml-4 text-[10px] text-slate-500 font-bold tracking-widest">PATH: ./src/main.py</span>
+                        </div>
+                        <pre class="p-6 md:p-10 text-sm leading-relaxed overflow-x-auto whitespace-pre">
+<span class="text-emerald-500 font-bold">// SYSTEM ENCRYPTION ACTIVE //</span>
+<span class="text-blue-400/60">/* Decrypting source sequence... */</span>
+
+{{ content }}</pre>
+                    </div>
+
+                    <footer class="mt-12 text-center">
+                        <p class="text-[9px] text-slate-600 uppercase tracking-[0.5em]">&copy; 2025 ZeraCorp Autonomous Systems</p>
+                    </footer>
+                </div>
+            </body>
+            </html>
+        """, content=code_content)
+    except Exception as e:
+        return f"ACCESS_DENIED: {str(e)}", 403
 
 @app.route("/api/process_full_ai", methods=['POST'])
 def process_data():
@@ -363,7 +446,12 @@ def ai_chat():
     if 'user_id' not in session: return jsonify({"message": "Unauthorized"}), 403
     query = request.json.get('query', '')
     # Pass engine references to the parser
-    answer = parse_ai_query(query, None, components['heuristic_engine'])
+    answer = parse_ai_query(
+        query,
+        components['monitor'].agent_monitor,
+        components['heuristic_engine'], 
+        components['gen_ai'] 
+    )
     return jsonify({"answer": answer})
 
 @app.route("/api/admin/get_users", methods=['GET'])
@@ -388,7 +476,8 @@ def initialize_database():
         id SERIAL PRIMARY KEY,
         username TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
-        role TEXT NOT NULL DEFAULT 'user'
+        role TEXT NOT NULL DEFAULT 'user',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );"""
     
     sensor_table_sql = """
@@ -396,6 +485,14 @@ def initialize_database():
         id SERIAL PRIMARY KEY, timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
         field_id TEXT, moisture INTEGER, temp INTEGER, nutrient_level TEXT, 
         pump_pressure INTEGER, ai_action TEXT, wind_speed INTEGER, solar_radiation INTEGER
+    );"""
+
+    syslogs_table_sql = """
+    CREATE TABLE IF NOT EXISTS system_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        level TEXT,
+        message TEXT,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     );"""
 
     if not IS_PRODUCTION():
@@ -424,6 +521,7 @@ def init_components():
     app.app_config = ConfigurationManager()
     app.api_client = ExternalAPIClient()
     app.heuristic_engine = HeuristicEngine()
+    app.ai_agent = AIActionDecider()
     app.predictive_model = MachineLearningModel() 
     app.monitoring_service = MonitoringService(None) 
     app.data_handler = DataIngestionHandler(app.app_config, app.predictive_model)
@@ -444,4 +542,4 @@ def start_background_threads():
 if __name__ == "__main__":
     init_system()
     start_threads()
-    app.run(host="127.0.0.1", port=5000, debug=True, use_reloader=False)
+    app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)
