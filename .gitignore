@@ -8,6 +8,7 @@ __pycache__/
 # Database file
 .log
 .db
+*.db
 *.sqlite3
 
 # Output data
